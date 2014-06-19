@@ -1,0 +1,55 @@
+// ############################################################################
+// Project Initialization
+// ############################################################################
+createDirs << {
+	webAppDir.mkdirs()
+	new File(webAppDir.toString() + "/WEB-INF").mkdirs()
+	new File(webAppDir.toString() + "/META-INF").mkdirs()
+	new File(webAppDir.toString() + "/WEB-INF/web.xml").text = file('../templates/web.xml.template').text.replaceAll("@module@", rootProject.name);
+
+	// build classname for entryPoint
+	char[] rootProjectArray = rootProject.name.toCharArray();
+	rootProjectArray[0] = Character.toUpperCase(rootProjectArray[0]);
+	char[] projectArray = project.name.toCharArray();
+	projectArray[0] = Character.toUpperCase(projectArray[0]);
+	def entryPointClassName =  new String(rootProjectArray) + new String(projectArray);
+	
+	sourceSets.main*.java.srcDirs*.each {
+
+		// EntryPoint Class 
+		def clientPackageName = parent.group + "." + rootProject.name + "." + project.name + ".client"
+
+		def clientPackage = it.toString() + "/" + parent.group.replaceAll("\\.", "/") +"/" + rootProject.name + "/" + project.name + "/client";
+		new File(clientPackage).mkdirs()
+
+		def entryPointFile = new File(clientPackage + "/" + entryPointClassName + ".java")
+		File entryPoint = file('../templates/entrypoint.java.template')
+		entryPointFile.text = entryPoint.text.replaceAll("@entryPointClass@", entryPointClassName).replaceAll("@package@", clientPackageName).replaceAll("@rootProjectName@", rootProject.name).replaceAll("@projectName@", project.name).replaceAll("@group@", rootProject.group);
+		
+		// Gin
+		def ginPackageName = parent.group + "." + rootProject.name + "." + project.name + ".client.gin"
+
+		def ginPackage = it.toString() + "/" + parent.group.replaceAll("\\.", "/") +"/" + rootProject.name + "/" + project.name + "/client/gin";
+		new File(ginPackage).mkdirs()
+
+		def injectorModuleFile = new File(ginPackage + "/InjectorModule.java")
+		File injectorModuleTemplate = file('../templates/InjectorModule.java.template')
+		injectorModuleFile.text = injectorModuleTemplate.text.replaceAll("@package@", ginPackageName);
+
+		def widgetInjector = new File(ginPackage + "/Injector.java")
+		File widgetInjectorTemplate = file('../templates/Injector.java.template')
+		widgetInjector.text = widgetInjectorTemplate.text.replaceAll("@package@", ginPackageName);
+		
+
+	}
+	
+	// gwt.xml
+	sourceSets.main*.resources.srcDirs*.each {
+		def entryPointClass = parent.group + "." + rootProject.name + "." + project.name + ".client." + entryPointClassName
+
+		// Module file (*.gwt.xml)
+		def gwtDefFile = new File(it.toString() + "/" + parent.group.replaceAll("\\.", "/") +"/" + rootProject.name + "/" + project.name + "/" + rootProject.name + ".gwt.xml")
+		File gwtModule = file('../templates/seedproject.gwt.xml.template')
+		gwtDefFile.text = gwtModule.text.replaceAll("@entryPointClass@", entryPointClass).replaceAll("@module@", rootProject.name)
+	}
+}

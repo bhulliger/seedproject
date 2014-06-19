@@ -1,0 +1,16 @@
+def timestampFormat = new java.text.SimpleDateFormat('dd.MM.yyyy HH:mm')
+timestampFormat.timeZone = TimeZone.getTimeZone("UTC+1")
+ext.buildTime = timestampFormat.format( new Date())
+
+if (envProperties.RELEASE_VERSION) {
+    version=envProperties.RELEASE_VERSION
+	if(envProperties.DEVELOPMENT_VERSION){
+		rootProject.file("version.txt").text = envProperties.DEVELOPMENT_VERSION		
+	}
+} else {
+	if(envProperties.BUILD_NUMBER){
+		version = rootProject.file("version.txt").text.trim() + "." + envProperties.BUILD_NUMBER
+	}else{
+		version = rootProject.file("version.txt").text.trim() + "-SNAPSHOT"
+	}
+}

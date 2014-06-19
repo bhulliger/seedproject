@@ -1,0 +1,1 @@
+include "shared", "api", "services:webservice", "services:shared", "app:shared", "app:mobile", "app:web"

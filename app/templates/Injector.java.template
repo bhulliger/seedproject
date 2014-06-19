@@ -1,0 +1,20 @@
+package @package@;
+
+import com.google.gwt.inject.client.GinModules;
+import com.google.gwt.inject.client.Ginjector;
+import com.google.gwt.place.shared.PlaceController;
+import com.google.gwt.place.shared.PlaceHistoryHandler;
+import com.google.web.bindery.event.shared.EventBus;
+
+@GinModules(InjectorModule.class)
+public interface Injector extends Ginjector {
+
+	PlaceHistoryHandler getPlaceHistoryHandler();
+
+	PlaceController getPlaceController();
+
+	EventBus getFrameworkEventBus();
+
+	EventBus getAppEventBus();
+
+}

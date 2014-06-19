@@ -1,0 +1,29 @@
+apply plugin: 'war'
+
+apply from: "../initialization.gradle"
+
+// ############################################################################
+// Dependencies
+// ############################################################################
+dependencies {
+	providedCompile group: 'com.googlecode.mgwt', 			name: 'mgwt', 			version: '2.0.0-m2-alpha'
+	providedCompile group: 'com.googlecode.gwtphonegap', 	name: 'gwtphonegap', 	version: '3.5.0.0'
+}
+
+// ############################################################################
+// GWT Build Tasks
+// ############################################################################
+apply from: "../gwt.gradle"
+
+apply plugin: 'war'
+apply plugin: 'gwt'
+	
+gwt {
+    gwtVersion='2.6.1'
+    modules rootProject.group + "." + rootProject.name + "." + project.name + "." + rootProject.name
+
+	superDev { 
+		noPrecompile=true
+	}
+}
+

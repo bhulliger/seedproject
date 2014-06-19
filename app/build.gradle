@@ -1,0 +1,18 @@
+subprojects {
+	
+	// ############################################################################
+	// GWT Gradle Plugin
+	// ############################################################################
+	buildscript {
+	    repositories {
+	        maven {
+	            url 'https://github.com/steffenschaefer/gwt-gradle-plugin/raw/maven-repo/'
+	        }
+	        mavenCentral()
+	    }
+	    dependencies {
+	        classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.4'
+	    }
+	}
+
+}

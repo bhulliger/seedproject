@@ -1,0 +1,27 @@
+apply plugin: "war"
+
+apply from: "../initialization.gradle"
+
+// ############################################################################
+// Dependencies
+// ############################################################################
+dependencies {
+	
+}
+
+// ############################################################################
+// GWT Build Tasks
+// ############################################################################
+apply from: "../gwt.gradle"
+
+apply plugin: 'war'
+apply plugin: 'gwt'
+	
+gwt {
+    gwtVersion='2.6.1'
+    modules rootProject.group + "." + rootProject.name + "." + project.name + "." + rootProject.name
+
+	superDev { 
+		noPrecompile=true
+	}
+}
