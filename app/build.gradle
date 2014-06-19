@@ -14,5 +14,7 @@ subprojects {
 	        classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.4'
 	    }
 	}
+	
+	
 
 }

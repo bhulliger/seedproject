@@ -15,5 +15,6 @@ dependencies {
 	providedCompile group: 	'com.google.gwt.inject', 		name: 'gin', 					version: '2.1.2'
 	providedCompile group:	'com.google.inject', 			name: 'guice', 					version: '4.0-beta4'
 	providedCompile group:	'com.google.inject.extensions',	name: 'guice-assistedinject', 	version: '4.0-beta4'
+	providedCompile group: 	'com.google.gwt.eventbinder', 	name: 'eventbinder', 			version: '1.0.2'
 }
 

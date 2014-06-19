@@ -44,7 +44,15 @@ createDirs << {
 		File widgetInjectorTemplate = file('../templates/Injector.java.template')
 		widgetInjector.text = widgetInjectorTemplate.text.replaceAll("@package@", ginPackageName);
 		
-
+		// Abstract Place
+		def placePkgName = clientPackage + "/place"
+		new File(placePkgName).mkdirs()
+		new File(placePkgName + "/AbstractPlace.java").text = file('../templates/AbstractPlace.java.template').text.replaceAll("@package@", clientPackageName + ".application")
+		
+		// BaseActivity
+		def appPkgName = clientPackage + "/app"
+		new File(appPkgName).mkdirs()
+		new File(appPkgName + "/BaseActivity.java").text = file('templates/BaseActivity.java.template').text.replaceAll("@package@", clientPackageName + ".app")
 	}
 	
 	// gwt.xml

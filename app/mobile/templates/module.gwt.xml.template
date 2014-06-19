@@ -5,16 +5,11 @@
 	<inherits name="com.google.gwt.logging.Logging" />
 	<inherits name="com.google.gwt.inject.Inject" />
 	<inherits name="org.fusesource.restygwt.RestyGWT" />
-	<inherits name='com.google.web.bindery.event.EventBinder' />
 
 	<!-- MGWT & Phonegap -->
 	<inherits name="com.googlecode.mgwt.MGWT" />
 	<inherits name="com.googlecode.mgwt.linker.Linker" />
 	<inherits name='com.googlecode.gwtphonegap.PhoneGap' />
-
-	<!-- change this if you want to support other devices too -->
-	<set-property name="user.agent" value="safari" />
-	<set-property name="mgwt.os" value="ipad_retina" />
 
 	<!-- Inherit the default GWT style sheet. You can change -->
 	<!-- the theme of your GWT application by uncommenting -->

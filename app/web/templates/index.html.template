@@ -18,7 +18,7 @@
 	<!-- produced by the GWT compiler in the module output directory -->
 	<!-- or generated automatically in development mode.             -->
 	<script language="javascript" src="@module@/@module@.nocache.js"></script>
-
+	
 	<!-- Include a history iframe to enable full GWT history support -->
 	<!-- (the id must be exactly as shown)                           -->
 	<iframe src="javascript:''" id="__gwt_historyFrame"
