@@ -1,0 +1,44 @@
+package @package@;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+
+import com.google.gwt.place.shared.Place;
+import com.google.gwt.place.shared.PlaceController;
+import com.google.gwt.user.client.ui.AcceptsOneWidget;
+import com.google.web.bindery.event.shared.EventBus;
+import com.google.web.bindery.event.shared.HandlerRegistration;
+import com.googlecode.mgwt.mvp.client.MGWTAbstractActivity;
+
+public abstract class BaseActivity extends MGWTAbstractActivity {
+
+	@Inject
+	private PlaceController placeController;
+
+	private EventBus frameworkEventBus;
+	private EventBus eventBus;
+	private HandlerRegistration eventRegistration;
+
+	@Inject
+	public void setFrameworkEventBus(@Named("frameworkEventBus") final EventBus frameworkEventBus) {
+		this.frameworkEventBus = frameworkEventBus;
+	}
+
+	public void goTo(final Place place) {
+		placeController.goTo(place);
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T extends BaseActivity> void start(final EventBinder<T> eventBinder) {
+		eventRegistration = eventBinder.bindEventHandlers((T) this, eventBus);
+	}
+
+	@Override
+	public void onStop() {
+		if (eventRegistration != null) {
+			eventRegistration.removeHandler();
+		}
+		super.onStop();
+	}
+
+}

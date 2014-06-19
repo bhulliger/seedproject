@@ -1,0 +1,34 @@
+package @package@;
+
+public abstract class BaseActivity {
+
+	@Inject
+	private PlaceController placeController;
+
+	private EventBus frameworkEventBus;
+	private EventBus eventBus;
+	private HandlerRegistration eventRegistration;
+
+	@Inject
+	public void setFrameworkEventBus(@Named("frameworkEventBus") final EventBus frameworkEventBus) {
+		this.frameworkEventBus = frameworkEventBus;
+	}
+
+	public void goTo(final Place place) {
+		placeController.goTo(place);
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T extends BaseActivity> void start(final EventBinder<T> eventBinder) {
+		eventRegistration = eventBinder.bindEventHandlers((T) this, eventBus);
+	}
+
+	@Override
+	public void onStop() {
+		if (eventRegistration != null) {
+			eventRegistration.removeHandler();
+		}
+		super.onStop();
+	}
+
+}
