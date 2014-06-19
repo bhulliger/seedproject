@@ -1,2 +1,12 @@
 .gradle
 build/
+/bin/
+.project
+app/web/war
+app/mobile/war
+.gwt
+.settings
+bin
+gradle
+gradlew
+gradlew.bat
