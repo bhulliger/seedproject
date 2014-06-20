@@ -2,11 +2,16 @@ apply plugin: "war"
 
 apply from: "../initialization.gradle"
 
+apply from: "../scaffolding.gradle"
+
 // ############################################################################
 // Dependencies
 // ############################################################################
 dependencies {
-	providedCompile 	group: 'com.github.gwtbootstrap',	name: 'gwt-bootstrap', 	version: '2.3.2.0'
+	providedCompile 	group: 'com.github.gwtbootstrap',		name: 'gwt-bootstrap', 			version: '2.3.2.0'
+	
+	providedCompile		group: 'com.google.gwt.eventbinder', 	name: 'eventbinder-parent', 	version: '1.0.2'
+	providedCompile		group: 'com.google.gwt.eventbinder', 	name: 'eventbinder', 			version: '1.0.2'
 }
 
 // ############################################################################
@@ -26,13 +31,3 @@ gwt {
 	}
 }
 
-task scaffold {
-	def console = System.console()
-	
-	if (console) {
-		packageName = console.readLine("> Please enter the destination package name: ")
-		baseName = console.readLine("> Please enter the name of the new place: ") 
-	} else {
-		logger.error "cannot get console."
-	}
-}

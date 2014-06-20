@@ -1,0 +1,13 @@
+package @package@;
+
+import @abstractPlace@;
+
+public class @name@Place extends AbstractPlace {
+
+	public static final String NAME = "@name@";
+
+	public @name@Place() {
+		super(NAME);
+	}
+	
+}

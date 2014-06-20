@@ -5,10 +5,10 @@ import javax.inject.Named;
 
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.place.shared.PlaceController;
-import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.web.bindery.event.shared.EventBus;
 import com.google.web.bindery.event.shared.HandlerRegistration;
 import com.googlecode.mgwt.mvp.client.MGWTAbstractActivity;
+import com.google.web.bindery.event.shared.binder.EventBinder;
 
 public abstract class BaseActivity extends MGWTAbstractActivity {
 
@@ -22,6 +22,10 @@ public abstract class BaseActivity extends MGWTAbstractActivity {
 	@Inject
 	public void setFrameworkEventBus(@Named("frameworkEventBus") final EventBus frameworkEventBus) {
 		this.frameworkEventBus = frameworkEventBus;
+	}
+			
+	public EventBus getFrameworkEventBus() {
+		return frameworkEventBus;
 	}
 
 	public void goTo(final Place place) {

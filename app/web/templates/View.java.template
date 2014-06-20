@@ -1,0 +1,15 @@
+package @package@;
+
+import @baseView@;
+
+public interface @name@View extends BaseView {
+
+	void setPresenter(final Presenter presenter);
+
+	interface Presenter {
+
+		// TODO put your presenter interface stuff here (everything you need from the view)
+
+	}
+
+}
