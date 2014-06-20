@@ -1,10 +1,12 @@
 <!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-    xmlns:g='urn:import:com.google.gwt.user.client.ui'>
+    xmlns:g='urn:import:com.google.gwt.user.client.ui' xmlns:b="urn:import:com.github.gwtbootstrap.client.ui">
 
   <g:HorizontalPanel>
     <g:Label>Keep your ducks</g:Label>
     <g:Label>in a row</g:Label>
+    <b:Button>Some Button</b:Button>
+    <b:Icon type="PLANE" />
   </g:HorizontalPanel>
 
 </ui:UiBinder>

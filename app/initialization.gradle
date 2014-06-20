@@ -8,8 +8,9 @@ createDirs << {
 	new File(webAppDir.toString() + "/WEB-INF/web.xml").text = file('templates/web.xml.template').text.replaceAll("@module@", rootProject.name);
 	new File(webAppDir.toString() + "/index.html").text = file('templates/index.html.template').text.replaceAll("@module@", rootProject.name)
 	new File(webAppDir.toString() + "/" + rootProject.name + ".css").text = "/* put your CSS styling here */"
-	
+}
 
+task('initProject') << {
 	// build classname for entryPoint
 	char[] rootProjectArray = rootProject.name.toCharArray();
 	rootProjectArray[0] = Character.toUpperCase(rootProjectArray[0]);
@@ -41,8 +42,8 @@ createDirs << {
 		
 
 		def widgetInjector = new File(ginPackage + "/Injector.java")
-		File widgetInjectorTemplate = file('../templates/Injector.java.template')
-		widgetInjector.text = widgetInjectorTemplate.text.replaceAll("@package@", ginPackageName);
+		File widgetInjectorTemplate = file('templates/Injector.java.template')
+		widgetInjector.text = widgetInjectorTemplate.text.replaceAll("@package@", ginPackageName).replaceAll("@app@", clientPackageName + ".app.App");
 		
 		// Abstract Place
 		def placePkgName = clientPackage + "/place"

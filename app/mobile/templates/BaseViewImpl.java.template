@@ -4,10 +4,4 @@ import com.google.gwt.user.client.ui.Composite;
 
 public abstract class BaseViewImpl extends Composite implements BaseView {
 
-	private Presenter presenter;
-	
-	public <T extends BaseView.Presenter> void setPresenter(T presenter) {
-		this.presenter = presenter;
-	}
-
 }

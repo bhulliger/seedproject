@@ -1,0 +1,13 @@
+package @package@;
+
+public interface AppView extends BaseView {
+
+	void createAppWidget();
+
+	interface Presenter extends BaseView.Presenter {
+
+		void start();
+
+	}
+
+}
