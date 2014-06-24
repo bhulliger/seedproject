@@ -1,1 +1,1 @@
-include "shared", "app:mobile", "app:web"
+include "app:web"

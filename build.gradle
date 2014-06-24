@@ -84,26 +84,38 @@ subprojects {
 	// ########################################################################
 	// Project Initialization
 	// ########################################################################
-	task createDirs << {
+	task createProjects << {
 		if (project.getChildProjects().isEmpty()) {
-			sourceSets*.java.srcDirs*.each {
-				new File(it.toString() + "/" + rootProject.group.replaceAll("\\.", "/") + "/" + rootProject.name + "/" + project.name).mkdirs()
-			}
-			sourceSets*.resources.srcDirs*.each {
-				it.mkdirs()
-			}
+			sourceSets*.java.srcDirs*.each { it.mkdirs() }
+			sourceSets*.resources.srcDirs*.each { it.mkdirs() }
 		}
 	}
 
-	task initProject(dependsOn:createDirs) << {
-		println "Initializing Project: " + project.path
-
+	task initProject(dependsOn:createProjects) << {
+		/** copy build files from templates */
 		def files = file("$profile.templates" + project.path.replaceAll(":", "/")).listFiles()
 		files.each { File file ->
 			if (file.isFile()) {
 				new File(project.projectDir.toString() + "/" + file.name).text = file.text
 			}
 		}
+
+		/** initialize project structure based on build files */
+		if (project.getChildProjects().isEmpty()) {
+			sourceSets*.java.srcDirs*.each {
+				new File(it.toString() + "/" + rootProject.group.replaceAll("\\.", "/") + "/" + rootProject.name + "/" + project.name).mkdirs()
+			}
+			sourceSets*.resources.srcDirs*.each {
+				new File(it.toString() + "/" + rootProject.group.replaceAll("\\.", "/") + "/" + rootProject.name + "/" + project.name).mkdirs()
+			}
+		}
+	}
+
+	// ########################################################################
+	// Scaffolding of project structure
+	// ########################################################################
+	task scaffold(dependsOn: initProject) << {
+		ext.templateBasePath = "$profile.templates" + "/scaffolding/" + project.path.replaceAll(":", "/") + "/"
 	}
 
 }
