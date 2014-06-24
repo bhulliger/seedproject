@@ -1,7 +1,0 @@
-package @package@;
-
-import com.google.gwt.user.client.ui.Composite;
-
-public abstract class BaseViewImpl extends Composite implements BaseView {
-
-}

@@ -1,5 +1,5 @@
 // ############################################################################
-// Group Definitions
+// Group Definition
 // ############################################################################
 group = 'ch.essentialmustard'
 
@@ -18,104 +18,13 @@ apply from: 'versioning.gradle'
 // ############################################################################
 apply from: "dist/conf/$env/profile.gradle"
 
-println "#####################################################################"
-println "# Environment: 	$env"
-println "# Version: 	" + version
-println "# Group: 	" + group		
+println '######################################################################'
+println "# Environment: 	$env"
+println "# Version: 	"	+ version
+println "# Group: 	"		+  group
 println "# BaseUrl: 	$profile.baseurl"
-println "# Build Date: 	" + new Date()
-println "#####################################################################"
-
-// ############################################################################
-// Analysis
-// ############################################################################
-apply plugin: "sonar-runner"
-sonarRunner {
-	sonarProperties {
-		property "sonar.sourceEncoding", "UTF-8"
-	}
-}
-
-
-// ############################################################################
-// Global Subproject definitions
-// ############################################################################
-subprojects {
-
-	apply plugin: "java"
-	apply plugin: "eclipse"
-	apply plugin: "eclipse-wtp"
-	apply plugin: "jacoco"
-
-	version = rootProject.version
-	group = rootProject.group
-
-	// ########################################################################
-	// Source Code Configuration
-	// ########################################################################
-	sourceCompatibility = 1.8
-
-	// ########################################################################
-	// Dependencies
-	// ########################################################################
-	dependencies {
-		testCompile group: 'junit', 			name: 'junit', 	version: '4.+'
-
-		compile 	group: 'org.projectlombok', name: 'lombok', version: '1.14.2'	
-
-	}
-
-
-
-	// ########################################################################
-	// Build & Distribution
-	// ########################################################################
-	jar {
-		manifest {
-			attributes 'Implementation-Title': rootProject.name + "-" + project.name, 'Implementation-Version': version
-		}
-	}
-
-	// ########################################################################
-	// Analysis
-	// ########################################################################
-	jacocoTestReport {
-		reports {
-			xml.enabled true
-		}
-	}
-
-	// ########################################################################
-	// Project Initialization
-	// ########################################################################
-	task deleteDirs << {
-
-		def console = System.console()
-		if (console != null) {
-			if (console.readLine("Are you sure you want to delete all src directories? Cannot be undone. [y,N]: ") == 'y') {
-				delete 'src'
-				delete 'bin'
-			}
-		} else {
-			// a bit drastic. when no console is available, the deletion is done without asking.
-			delete 'src'
-			delete 'bin'
-		}
-	}
-
-	task createDirs << {
-
-		if (project.getChildProjects().isEmpty()) {
-			sourceSets*.java.srcDirs*.each { 
-				new File(it.toString() + "/" + parent.group.replaceAll("\\.", "/") +"/" + rootProject.name + "/" + project.name).mkdirs()
-			}
-	   		sourceSets*.resources.srcDirs*.each { 
-	   			new File(it.toString() + "/" + parent.group.replaceAll("\\.", "/") +"/" + rootProject.name + "/" + project.name).mkdirs()
-	   		}
-   		}
-	}
-
-}
+println "# Build Date: 	" 	+ new Date()  
+println '######################################################################'
 
 // ############################################################################
 // Global Projects definitions
@@ -129,7 +38,72 @@ allprojects {
 		mavenCentral()
 	}
 
-	
+	// ########################################################################
+	// Project Cleanup
+	// ########################################################################
+	task deleteDirs << {
+		delete 'src'
+		delete 'bin'
+		delete 'build'
+		delete '.gradle'
+	}
 }
 
+// ############################################################################
+// Global Subproject definitions
+// ############################################################################
+subprojects {
+	apply plugin: "java"
+	apply plugin: "eclipse"
+	apply plugin: "eclipse-wtp"
 
+	version = rootProject.version
+	group = rootProject.group
+
+	// ########################################################################
+	// Source Code Configuration
+	// ########################################################################
+	sourceCompatibility = 1.8
+
+	// ########################################################################
+	// Dependencies
+	// ########################################################################
+	dependencies {
+		testCompile		group: 'junit', 		name: 'junit',		version: '4.+'
+	}
+
+	// ########################################################################
+	// Build & Distribution
+	// ########################################################################
+	jar {
+		manifest {
+			attributes 'Implementation-Title' : rootProject.name + "-" + project.name, 'Implementation-Version' : version
+		}
+	}
+
+	// ########################################################################
+	// Project Initialization
+	// ########################################################################
+	task createDirs << {
+		if (project.getChildProjects().isEmpty()) {
+			sourceSets*.java.srcDirs*.each {
+				new File(it.toString() + "/" + rootProject.group.replaceAll("\\.", "/") + "/" + rootProject.name + "/" + project.name).mkdirs()
+			}
+			sourceSets*.resources.srcDirs*.each {
+				it.mkdirs()
+			}
+		}
+	}
+
+	task initProject(dependsOn:createDirs) << {
+		println "Initializing Project: " + project.path
+
+		def files = file("$profile.templates" + project.path.replaceAll(":", "/")).listFiles()
+		files.each { File file ->
+			if (file.isFile()) {
+				new File(project.projectDir.toString() + "/" + file.name).text = file.text
+			}
+		}
+	}
+
+}

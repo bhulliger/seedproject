@@ -1,10 +1,5 @@
 apply plugin: "war"
 
-apply from: "../initialization.gradle"
-apply from: "initialization_web.gradle"
-
-apply from: "../scaffolding.gradle"
-
 // ############################################################################
 // Dependencies
 // ############################################################################
