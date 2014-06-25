@@ -37,16 +37,6 @@ allprojects {
 	repositories {
 		mavenCentral()
 	}
-
-	// ########################################################################
-	// Project Cleanup
-	// ########################################################################
-	task deleteDirs << {
-		delete 'src'
-		delete 'bin'
-		delete 'build'
-		delete '.gradle'
-	}
 }
 
 // ############################################################################
@@ -118,4 +108,18 @@ subprojects {
 		ext.templateBasePath = "$profile.templates" + "/scaffolding/" + project.path.replaceAll(":", "/") + "/"
 	}
 
+}
+
+// ############################################################################
+// Project Cleanup
+// ############################################################################
+task deleteAll << {
+	delete 'bin'
+	delete 'build'
+	delete '.gradle'
+
+	rootProject.getChildProjects().each {
+		println "*** Deleting Project " + it.key + " ***"	
+		delete it.key
+	}
 }

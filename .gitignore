@@ -10,3 +10,4 @@ bin
 gradle
 gradlew
 gradlew.bat
+.classpath
