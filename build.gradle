@@ -11,20 +11,54 @@ ext.envProperties = System.getenv()
 // ############################################################################
 // Versioning
 // ############################################################################
-apply from: 'versioning.gradle'
+apply from: "$rootDir/gradle/versioning.gradle"
+
+task writeVersionFile << {
+	def versionfile = new File('version.txt')
+	vesrionfile.text = "RELEASE_VERSION=" + project.version.toString()
+}
 
 // ############################################################################
 // Environment
 // ############################################################################
-apply from: "dist/conf/$env/profile.gradle"
+def env = project.hasProperty('env') ? project.getProperty('env') : 'local'
+def config = new ConfigSlurper(env).parse(file("$rootDir/gradle/build.groovy").toURL())
+
+allprojects {
+	ext.config = config
+}
+
+task wrapper(type: Wrapper) {
+	gradleVersion = '2.0'
+}
 
 println '######################################################################'
 println "# Environment: 	$env"
 println "# Version: 	"	+ version
 println "# Group: 	"		+  group
-println "# BaseUrl: 	$profile.baseurl"
 println "# Build Date: 	" 	+ new Date()  
 println '######################################################################'
+
+// ############################################################################
+// QA & Code Analysis
+// ############################################################################
+apply plugin: "sonar-runner"
+
+sonarRunner {
+	sonarProperties {
+		property "sonar.host.url", config.sonar.host.url
+        property "sonar.jdbc.url", config.sonar.jdbc.url
+        property "sonar.jdbc.driverClassName", config.sonar.jdbc.driverClassName
+        property "sonar.jdbc.username", config.sonar.jdbc.username
+        property "sonar.jdbc.password", config.sonar.jdbc.password
+		property "sonar.projectName", config.sonar.projectName
+		property "sonar.projectKey", config.sonar.projectKey
+		property "sonar.exclusions" , config.sonar.exclusions
+		property "sonar.jacoco.excludes", config.sonar.jacoco.excludes
+		property "sonar.sourceEncoding", "UTF-8"
+
+	}
+}
 
 // ############################################################################
 // Global Projects definitions
@@ -35,7 +69,19 @@ allprojects {
 	// Repositories
 	// ########################################################################
 	repositories {
+		maven {
+			url config.artifactRepository.publicRepo
+		}
 		mavenCentral()
+	}
+
+	buildscript {
+		repositories {
+			maven {
+				url config.artifactRepository.publicRepo
+			}
+			mavenCentral()
+		}
 	}
 }
 
@@ -46,6 +92,7 @@ subprojects {
 	apply plugin: "java"
 	apply plugin: "eclipse"
 	apply plugin: "eclipse-wtp"
+	apply plugin: "jacoco"
 
 	version = rootProject.version
 	group = rootProject.group
@@ -58,10 +105,29 @@ subprojects {
 	// ########################################################################
 	// Dependencies
 	// ########################################################################
-	dependencies {
-		testCompile		group: 'junit', 				name: 'junit',		version: '4.+'
-		
-		compile 		group: 'org.projectlombok', 	name: 'lombok', 	version: '1.14.+'
+	apply from: "$rootDir/dependencies.gradle"
+
+	// ########################################################################
+	// Unit & Integration Tests
+	// ########################################################################
+	test {
+		exclude "**/*IT.*"
+	}
+
+	task integrationTest(type: Test) {
+		description 'Run the integration tests'
+		filter {
+			// only run tests that match the pattern *IT.java*
+			includeTestsMatching "*IT.java"
+		}
+
+		group = 'verification'
+
+		reports {
+			junitXml {
+				destination = file("$reports,junitXml,destination/integration")
+			}
+		}
 	}
 
 	// ########################################################################
@@ -74,25 +140,27 @@ subprojects {
 	}
 
 	// ########################################################################
-	// Project Initialization
+	// Reporting
 	// ########################################################################
-	task createProjects << {
-		if (project.getChildProjects().isEmpty()) {
-			sourceSets*.java.srcDirs*.each { it.mkdirs() }
-			sourceSets*.resources.srcDirs*.each { it.mkdirs() }
+	jacoco {
+		toolVersion = "0.7.1.201405082137"
+	}
+
+	jacocoTestReport {
+		reports {
+			xml.enabled true
 		}
 	}
 
-	task initProject(dependsOn:createProjects) << {
-		/** copy build files from templates */
-		def files = file("$profile.templates" + project.path.replaceAll(":", "/")).listFiles()
-		files.each { File file ->
-			if (file.isFile()) {
-				new File(project.projectDir.toString() + "/" + file.name).text = file.text
-			}
-		}
+	// ########################################################################
+	// Project Initialization
+	// ########################################################################
 
-		/** initialize project structure based on build files */
+	task initProject(type: Copy) {
+
+		from "$config.templates.path/skeleton/" + project.path.replaceAll(":", "/")
+		into "$rootDir" + project.path.replaceAll(":", "/")
+
 		if (project.getChildProjects().isEmpty()) {
 			sourceSets*.java.srcDirs*.each {
 				new File(it.toString() + "/" + rootProject.group.replaceAll("\\.", "/") + "/" + rootProject.name + "/" + project.name).mkdirs()
@@ -106,22 +174,31 @@ subprojects {
 	// ########################################################################
 	// Scaffolding of project structure
 	// ########################################################################
-	task scaffold(dependsOn: initProject) << {
-		ext.templateBasePath = "$profile.templates" + "/scaffolding/" + project.path.replaceAll(":", "/") + "/"
+	task scaffold(dependsOn: initProject) {
+		description "Scaffolds a basic application based on the provided template structure (in dist/src/main/resources/build.groovy)"
+		ext.templateBasePath = config.templates.path + "/scaffolding/" + project.path.replaceAll(":", "/") + "/"
 	}
 
 }
 
+
+task initProject(type: Copy) << {
+	from "$config.templates.path/skeleton/dist" 
+	into "dist"
+}
+
+
 // ############################################################################
 // Project Cleanup
 // ############################################################################
-task deleteAll << {
+task deleteAll() << {
+	description 'Removes all subprojects and the content. Don`t use this lightly!'
 	delete 'bin'
 	delete 'build'
 	delete '.gradle'
+	delete 'dist'
 
 	rootProject.getChildProjects().each {
-		println "*** Deleting Project " + it.key + " ***"	
 		delete it.key
 	}
 }
