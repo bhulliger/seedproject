@@ -108,6 +108,17 @@ subprojects {
 	apply from: "$rootDir/dependencies.gradle"
 
 	// ########################################################################
+	// Source Sets
+	// ########################################################################
+	sourceSets {
+		generated {
+	        java {
+	            srcDir 'src/generated/java'
+	        }
+	    }
+	}
+
+	// ########################################################################
 	// Unit & Integration Tests
 	// ########################################################################
 	test {
@@ -157,6 +168,7 @@ subprojects {
 	// ########################################################################
 
 	task initProject(type: Copy) {
+		description "initializes the project structure with all required packages and build files."
 
 		from "$config.templates.path/skeleton/" + project.path.replaceAll(":", "/")
 		into "$rootDir" + project.path.replaceAll(":", "/")
@@ -182,7 +194,8 @@ subprojects {
 }
 
 
-task initProject(type: Copy) << {
+task initProject(type: Copy) {
+	description "initializes the root project with the distribution files."
 	from "$config.templates.path/skeleton/dist" 
 	into "dist"
 }
