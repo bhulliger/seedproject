@@ -1,0 +1,132 @@
+buildscript {
+
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath "com.terrafolio:gradle-jenkins-plugin:1.2.1"
+    }
+}
+
+apply plugin: "com.terrafolio.jenkins"
+
+jenkins {
+    servers {
+        testing {
+            url "http://localhost:8080"
+            secure true
+            username ""
+            password ""
+        }
+    }
+
+    defaultServer servers.testing
+
+    views {
+        dsl {
+             view {
+                name "${rootProject.name}"
+                
+                jobs {
+                    name("${project.name}-initial")
+                }
+                
+                /*jobs {
+                    name "${rootProject.name}-initial"
+                }*/
+            }
+        }
+    }
+   
+     
+
+        
+    jobs {
+        // ####################################################################
+        // Step 1: Initial job, triggers after every checking (commit stage)
+        // ####################################################################
+        "${project.name}-initial" {
+            dsl {
+                triggers {
+                    scm 'H/5 * * * *'
+                }
+            }
+            
+        }
+
+        // ####################################################################
+        // Step 2: Integration Tests (commit stage)
+        // ####################################################################
+        "${project.name}-integration-tests" {
+            dsl {
+
+            }
+        }
+
+        // ####################################################################
+        // Step 3: Code Analysis (commit stage)
+        // ####################################################################
+        "${project.name}-code-analysis" {
+            dsl {
+            
+            }
+        }
+
+        // ####################################################################
+        // Step 4: Assemble & Publish (commit stage)
+        // ####################################################################
+        "${project.name}-distribution" {
+            dsl {
+            
+            }
+        }
+
+        // ####################################################################
+        // Step 5: Deploy Integration (acceptance stage)
+        // ####################################################################
+        "${project.name}-deploy_int" {
+            dsl {
+            
+            }
+        }
+
+        // ####################################################################
+        // Step 6: Acceptance Tests (acceptance stage)
+        // ####################################################################
+        "${project.name}-acceptance_tests" {
+            dsl {
+            
+            }
+        }
+
+        // ####################################################################
+        // Step 7: Performance Tests (acceptance stage)
+        // ####################################################################
+        "${project.name}-performance_tests" {
+            dsl {
+            
+            }
+        }
+
+        // ####################################################################
+        // Step 8: Deploy to Test (trigger manually)
+        // ####################################################################
+        "${project.name}-deploy_test" {
+            dsl {
+            
+            }
+        }
+
+        // ####################################################################
+        // Step 9: Deploy to Prod (trigger manually)
+        // ####################################################################
+        "${project.name}-deploy_prod" {
+            dsl {
+            
+            }
+        }
+         
+    }
+
+    
+}
