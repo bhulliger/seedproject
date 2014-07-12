@@ -7,7 +7,7 @@ app/mobile/war
 .gwt
 .settings
 bin
-gradle
 gradlew
 gradlew.bat
 .classpath
+gradle/wrapper/
