@@ -1,0 +1,47 @@
+// ############################################################################
+// Sonar
+// ############################################################################
+
+apply plugin: "sonar-runner"
+
+sonarRunner {
+	sonarProperties {
+		property "sonar.host.url", config.sonar.host.url
+        property "sonar.jdbc.url", config.sonar.jdbc.url
+        property "sonar.jdbc.driverClassName", config.sonar.jdbc.driverClassName
+        property "sonar.jdbc.username", config.sonar.jdbc.username
+        property "sonar.jdbc.password", config.sonar.jdbc.password
+		property "sonar.projectName", config.sonar.projectName
+		property "sonar.projectKey", config.sonar.projectKey
+		property "sonar.exclusions" , config.sonar.exclusions
+		property "sonar.jacoco.excludes", config.sonar.jacoco.excludes
+		property "sonar.sourceEncoding", "UTF-8"
+
+	}
+}
+
+// ############################################################################
+// PMD
+// ############################################################################
+apply plugin: 'pmd'
+
+pmd {
+	ignoreFailures = true
+}
+
+tasks.withType(Pmd) {
+	reports {
+		xml.enabled = false
+		html.enabled = true
+	}
+}
+
+// ############################################################################
+// JDepend
+// ############################################################################
+apply plugin: 'jdepend'
+
+jdepend {
+	toolVersion = '2.9.1'
+	ignoreFailures = true
+}

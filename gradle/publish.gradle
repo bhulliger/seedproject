@@ -1,0 +1,26 @@
+buildscript {
+    repositories {
+        maven { 
+			url 'http://repo.jfrog.org/artifactory/gradle-plugins' 
+		}
+    }
+    
+	dependencies {
+		classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:2.1.0'
+    }
+}
+
+apply plugin: org.jfrog.gradle.plugin.artifactory.ArtifactoryConfigurationsPlugin
+
+ext.artifactoryUrl = config.artifactRepository.url
+ext.artifactoryUsername = config.artifactRepository.username
+ext.artifactoryPassword = config.artifactRepository.password
+
+artifactory {
+	publish {
+	    contextUrl = artifactoryUrl
+		repoKey = project.version.endsWith('-SNAPSHOT') ? 'libs-snapshot-local' : 'libs-release-local'
+		username = artifactoryUsername
+		password = artifactoryPassword
+	}
+}

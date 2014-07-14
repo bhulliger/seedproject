@@ -22,7 +22,7 @@ task writeVersionFile << {
 // Environment
 // ############################################################################
 def env = project.hasProperty('env') ? project.getProperty('env') : 'local'
-def config = new ConfigSlurper(env).parse(file("$rootDir/gradle/build.groovy").toURL())
+def config = new ConfigSlurper(env).parse(file("$rootDir/gradle/config/build.groovy").toURL())
 
 allprojects {
 	ext.config = config
@@ -42,23 +42,7 @@ println '######################################################################'
 // ############################################################################
 // QA & Code Analysis
 // ############################################################################
-apply plugin: "sonar-runner"
-
-sonarRunner {
-	sonarProperties {
-		property "sonar.host.url", config.sonar.host.url
-        property "sonar.jdbc.url", config.sonar.jdbc.url
-        property "sonar.jdbc.driverClassName", config.sonar.jdbc.driverClassName
-        property "sonar.jdbc.username", config.sonar.jdbc.username
-        property "sonar.jdbc.password", config.sonar.jdbc.password
-		property "sonar.projectName", config.sonar.projectName
-		property "sonar.projectKey", config.sonar.projectKey
-		property "sonar.exclusions" , config.sonar.exclusions
-		property "sonar.jacoco.excludes", config.sonar.jacoco.excludes
-		property "sonar.sourceEncoding", "UTF-8"
-
-	}
-}
+apply from: "$rootDir/gradle/codeanalysis.gradle"
 
 // ############################################################################
 // Global Projects definitions
@@ -129,27 +113,17 @@ subprojects {
 	}
 
 	// ########################################################################
-	// Unit & Integration Tests
+	// Unit & Integration Tests & & Functional Tests & JMeter Tests
 	// ########################################################################
 	test {
 		exclude "**/*IT.*"
 	}
 
-	task integrationTest(type: Test) {
-		description 'Run the integration tests'
-		filter {
-			// only run tests that match the pattern *IT.java*
-			includeTestsMatching "*IT.java"
-		}
+	apply from: "$rootDir/gradle/integrationTest.gradle"
 
-		group = 'verification'
+	// apply from: "$rootDir/gradle/functionalTest.gradle"
 
-		reports {
-			junitXml {
-				destination = file("$reports,junitXml,destination/integration")
-			}
-		}
-	}
+	apply from: "$rootDir/gradle/loadTest.gradle"
 
 	// ########################################################################
 	// Build & Distribution
@@ -165,6 +139,8 @@ subprojects {
 	// ########################################################################
 	jacoco {
 		toolVersion = "0.7.1.201405082137"
+
+		// integrationTestTaskName = "integrationTest"
 	}
 
 	jacocoTestReport {

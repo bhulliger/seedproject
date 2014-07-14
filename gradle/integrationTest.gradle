@@ -1,0 +1,45 @@
+// ############################################################################
+// Source Sets
+// ############################################################################
+sourceSets {
+	integrationTest {
+		java.srcDir file('src/integTest/java')
+		resources.srcDir file('src/integTest/resources')
+		compileClasspath = sourceSets.main.output + configurations.testRuntime
+		runtimeClasspath = output + compileClasspath
+	}
+}
+
+// ############################################################################
+// Integration Test
+// ############################################################################
+task integrationTest(type: Test) {
+	description 'Run the integration tests'
+	filter {
+		// only run tests that match the pattern *IT.java*
+		includeTestsMatching "*IT.java"
+	}
+
+	group = 'verification'
+
+	reports {
+		junitXml {
+			destination = file("$reports,junitXml,destination/integration")
+		}
+	}
+}
+
+apply from: "$rootDir/gradle/databaseSetup.gradle"
+
+integrationTest.dependsOn startAndPrepareDatabase
+
+stopDatabase.dependsOn integrationTest
+task databaseIntegrationTest(dependsOn: stopDatabase)
+
+check.dependsOn databaseIntegrationTest
+
+sonarRunner {
+	sonarProperties {
+		properties['sonar.tests'] += sourceSets.integrationTest.allSource.srcDirs
+	}
+}

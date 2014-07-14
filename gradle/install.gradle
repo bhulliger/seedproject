@@ -41,7 +41,7 @@ remotes {
 	}
 }
 
-task install(type: SshTask, dependsOn: downloadArtifactArchive) {
+task deploy(type: SshTask, dependsOn: downloadArtifactArchive) {
 	description 'installs the artifact on the server (by SSH)'
 
 	ssh {

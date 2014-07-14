@@ -18,14 +18,18 @@ server {
 }
 
 jenkins {
-	url = "http://jenkins:8080/jenkins"
-	username = "" // TODO
-	password = "" // TODO
+	url = "http://localhost:8080" // TODO
+	username = "jenkins" // TODO
+	password = "n0mores3cr3ts" // TODO
+
+	authorization {
+		permission = "admin" // TODO
+	}
 }
 
 sonar {
 	host {
-		url = "http://sonar:9000"
+		url = "http://localhost:9000"
 	}
 	jdbc {
 		url = "" // TODO
@@ -43,7 +47,11 @@ sonar {
 
 scm {
 	git {
-		url = "" // TODO
+		url = "https://github.com/bhulliger/seedproject.git"
+	}
+
+	svn {
+		url = ""
 	}
 }
 
@@ -91,6 +99,7 @@ environments {
 	// Integration
 	// ########################################################################
 	integration {
+		env = "int"
 		// TODO
 	}
 
@@ -98,6 +107,7 @@ environments {
 	// Test
 	// ########################################################################
 	test {
+		env = "test"
 		// TODO
 	}
 
@@ -105,6 +115,7 @@ environments {
 	// Production
 	// ########################################################################
 	prod {
+		env = "prod"
 		// TODO
 	}
 
