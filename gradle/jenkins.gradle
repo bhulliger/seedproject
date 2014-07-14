@@ -1,54 +1,108 @@
-buildscript {
-
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath "com.terrafolio:gradle-jenkins-plugin:1.2.1"
-    }
-}
-
 apply plugin: "com.terrafolio.jenkins"
 
 jenkins {
     servers {
         testing {
-            url "http://localhost:8080"
+            url config.jenkins.url
             secure true
-            username ""
-            password ""
+            username config.jenkins.username
+            password config.jenkins.password
         }
     }
 
     defaultServer servers.testing
 
-    views {
+    // ########################################################################
+    // View for the project 
+    // ########################################################################
+    /*views {
+
         dsl {
-             view {
+            view {
                 name "${rootProject.name}"
+                description "Build Queue for the project ${rootProject.name}"
                 
+                /* TODO: doesn't work. 
                 jobs {
-                    name("${project.name}-initial")
+                    regex "${rootProject.name}-[a-zA-Z\\-_]+"   
                 }
-                
-                /*jobs {
-                    name "${rootProject.name}-initial"
-                }*/
+                */
+/*
+                columns {
+                    buildButton()
+                    lastDuration()
+                    lastFailure()
+                    lastSuccess()
+                    name()
+                    status()
+                    weather()
+                }
+            } 
+        }
+        
+    }*/
+
+    // ########################################################################
+    // Templates
+    // ########################################################################
+    templates {
+        base {
+            dsl {
+                // logRotator(daysToKeep,numToKeep,artifactDaysToKeep,artifactNumToKeep)
+                logRotator (-1,10,-1,5)
+
+                authorization {
+                    permissionAll "${config.jenkins.authorization.permission}"
+                }
+
+                configure { project ->
+
+                    // pipeline
+                    def properties = project / properties
+                    properties.appendNode("se.diabol.jenkins.pipeline.PipelineProperty", [ 'plugin' : 'delivery-pipeline-plugin@0.8.2']) << {
+                        stageName 'BUILD'
+                    }
+
+                    // build name setter
+                    def buildWrappers = project / buildWrappers
+                    buildWrappers.appendNode("org.jenkinsci.plugins.buildnamesetter.BuildNameSetter", [ 'plugin' : 'build-name-setter@1.3']) << {
+                        template 'NAME#${BUILD_NUMBER}'
+                    }
+
+                    // mask passwords
+                    buildWrappers.appendNode("com.michelin.cio.hudson.plugins.maskpasswords.MaskPasswordsBuildWrapper")
+                }
+
             }
         }
     }
-   
-     
 
-        
+    // ########################################################################
+    // Jobs 
+    // ########################################################################
     jobs {
         // ####################################################################
         // Step 1: Initial job, triggers after every checking (commit stage)
         // ####################################################################
-        "${project.name}-initial" {
+        "${rootProject.name}-initial" {
             dsl {
+
+                using "base"
+
+                scm {
+                    git( "${config.scm.git.url}" )
+                }
+
                 triggers {
                     scm 'H/5 * * * *'
+                }
+
+                steps {
+                    gradle ('clean test', '', true)  {
+                        rootBuildScriptDir 'true'
+                        fromRootBuildScriptDir 'true'
+                    }
+
                 }
             }
             
@@ -57,7 +111,7 @@ jenkins {
         // ####################################################################
         // Step 2: Integration Tests (commit stage)
         // ####################################################################
-        "${project.name}-integration-tests" {
+        "${rootProject.name}-integration-tests" {
             dsl {
 
             }
@@ -66,7 +120,7 @@ jenkins {
         // ####################################################################
         // Step 3: Code Analysis (commit stage)
         // ####################################################################
-        "${project.name}-code-analysis" {
+        "${rootProject.name}-code-analysis" {
             dsl {
             
             }
@@ -75,7 +129,7 @@ jenkins {
         // ####################################################################
         // Step 4: Assemble & Publish (commit stage)
         // ####################################################################
-        "${project.name}-distribution" {
+        "${rootProject.name}-distribution" {
             dsl {
             
             }
@@ -84,7 +138,7 @@ jenkins {
         // ####################################################################
         // Step 5: Deploy Integration (acceptance stage)
         // ####################################################################
-        "${project.name}-deploy_int" {
+        "${rootProject.name}-deploy_int" {
             dsl {
             
             }
@@ -93,7 +147,7 @@ jenkins {
         // ####################################################################
         // Step 6: Acceptance Tests (acceptance stage)
         // ####################################################################
-        "${project.name}-acceptance_tests" {
+        "${rootProject.name}-acceptance_tests" {
             dsl {
             
             }
@@ -102,7 +156,7 @@ jenkins {
         // ####################################################################
         // Step 7: Performance Tests (acceptance stage)
         // ####################################################################
-        "${project.name}-performance_tests" {
+        "${rootProject.name}-performance_tests" {
             dsl {
             
             }
@@ -111,7 +165,7 @@ jenkins {
         // ####################################################################
         // Step 8: Deploy to Test (trigger manually)
         // ####################################################################
-        "${project.name}-deploy_test" {
+        "${rootProject.name}-deploy_test" {
             dsl {
             
             }
@@ -120,7 +174,7 @@ jenkins {
         // ####################################################################
         // Step 9: Deploy to Prod (trigger manually)
         // ####################################################################
-        "${project.name}-deploy_prod" {
+        "${rootProject.name}-deploy_prod" {
             dsl {
             
             }

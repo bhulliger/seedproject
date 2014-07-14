@@ -63,6 +63,16 @@ sonarRunner {
 // ############################################################################
 // Global Projects definitions
 // ############################################################################
+buildscript {
+	repositories {
+		jcenter()
+	}
+
+	dependencies {
+		classpath "com.terrafolio:gradle-jenkins-plugin:1.2.1"
+	}
+}
+
 allprojects {
 
 	// ########################################################################
