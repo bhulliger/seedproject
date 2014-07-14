@@ -69,6 +69,7 @@ jenkins {
 
                     // mask passwords
                     (project / buildWrappers).appendNode("com.michelin.cio.hudson.plugins.maskpasswords.MaskPasswordsBuildWrapper")
+
                 }
 
             }
@@ -89,21 +90,53 @@ jenkins {
 
                 scm {
                     git( "${config.scm.git.url}" )
+                    // svn( "${config.scm.svn.url}" )
                 }
 
                 triggers {
+                    // check for scm updates every 5 minutes
                     scm 'H/5 * * * *'
                 }
 
                 steps {
                     gradle ('clean test', '', true)  {
                         rootBuildScriptDir 'true'
-                        fromRootBuildScriptDir 'true'
+                        fromRootBuildScriptDir true
                     }
 
                 }
 
                 publishers {
+                    // Archive for Clone Workspace SCM
+                    publishCloneWorkspace '**/*', '', 'Successful', 'TAR', false
+
+                    // Publish JUnit test result report
+                    archiveJunit '**/test-results/TEST-*.xml'
+
+                    // Record JaCoCo coverage Report
+                    jacocoCodeCoverage {
+                        execPattern '**/build/jacoco/test.exec'
+                        classPattern '**/src/main/java'
+                        maximumInstructionCoverage '100'
+                        maximumBranchCoverage '70'
+                        maximumComplexityCoverage '70'
+                        maximumLineCoverage '70'
+                        maximumMethodCoverage '70'
+                        maximumClassCoverage '70'
+
+                    }
+
+                    // Email Notification
+                    extendedEmail 'bhu@ims.ch'
+
+                    // Trigger parameterized build on other projects
+                    downstreamParameterized {
+                        trigger ("${rootProject.name}-integration-tests", 'SUCCESS', true, ['buildStepFailure': 'FAILURE', 'failure' : 'FAILURE', 'unstable' : 'UNSTABLE']) {
+                            currentBuild() // Current Build Parameters
+                            predefinedProps(['SOUCE_BUILD_NUMBER':'${BUILD_NUMBER}', 'SVN_REVISION' : '${SVN_REVISION}'])
+                            setTriggerWithNoParameters false
+                        }
+                     }
 
                 }
             }
