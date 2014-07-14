@@ -28,10 +28,10 @@ sonar {
 		url = "http://sonar:9000"
 	}
 	jdbc {
-		url = "jdbc:oracle:thin:@imssvora11:1521:dora11gu"
-		driverClassName = "oracle.jdbc.OracleDriver"
-		username = "sonar"
-		password = "sonar"
+		url = "" // TODO
+		driverClassName = "" // TODO
+		username = "" // TODO
+		password = "" // TODO
 	}
 	projectName = "" // TODO
 	projectKey = "" // TODO
@@ -43,7 +43,7 @@ sonar {
 
 scm {
 	git {
-		url = "git@github.com/bhulliger/seedproject.git"
+		url = "" // TODO
 	}
 }
 
@@ -51,11 +51,11 @@ scm {
 // Artifacts
 // ############################################################################
 artifactRepository {
-	url = "http://artifactory.ims.ch:8081"
-	username = "developer"
-	password = "ascotel"
-	name = "libs-release-local"
-	publicRepo = "http://artifactory.ims.ch:8081/artifactory/public/"
+	url = "" // TODO
+	username = ""
+	password = ""
+	name = ""
+	publicRepo = "" 
 }
 
 // ############################################################################
