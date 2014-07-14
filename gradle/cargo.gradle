@@ -1,0 +1,63 @@
+// ############################################################################
+// Source Sets & BuildScript
+// ############################################################################
+buildscript {
+	repositories {
+		mavenCentral()
+		jcenter()
+	}
+	dependencies {
+		classpath 'org.gradle.api.plugins:gradle-cargo-plugin:1.5'
+	}
+}
+
+apply plugin: org.gradle.api.plugins.cargo.CargoPlugin
+
+// ############################################################################
+// Dependencies
+// ############################################################################
+dependencies {
+
+	cargo 		group: 'org.codehaus.cargo', 		name: 'cargo-core-uberjar', 			version: '1.4.8'
+	cargo 		group: 'org.codehaus.cargo', 		name: 'cargo-ant', 						version: '1.4.8'
+	cargo 		group: 'org.jboss.as',				name: 'jboss-as-controller-client', 	version: '7.2.0.Final'
+
+}
+
+
+// ############################################################################
+// Cargo Configuration
+// ############################################################################
+cargo {
+	containerId = 'jboss71x'
+
+	deployable {
+		context = config.server.context
+	}
+
+	local {
+		installer {
+			installUrl = 'http://download.jboss.org/jbossas/7.1/jboss-as-7.1.1.Final/jboss-as-7.1.1.Final.zip'
+			downloadDir = file("$buildDir/download")
+			extractDir = file("$buildDir/extract")
+		}
+
+		configFile {
+			file = file("$rootDir/dist/src/main/resources/conf/standalone.xml")
+			toDir = new File('configuration')
+		}
+
+		jvmArgs = "-Xdebug -Xrunjdwp:transport=dt_socket,address=8001,server=y,suspend=n"
+	}
+
+}
+
+task cargoAddJBossModules(type: Copy) {
+	description 'Copies the JBoss Module to Cargo'
+	// Modules
+	from "$rootDir/dist/src/main/resources/jboss/modules"
+	into "$buildDir/extract/jboss-as-7.1.1.Final/jboss-as-7.1.1.Final/modules"
+}
+
+cargoRunLocal.dependsOn assemble
+cargoRunLocal.dependsOn cargoAddJBossModules

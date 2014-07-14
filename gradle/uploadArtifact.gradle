@@ -1,0 +1,27 @@
+// ############################################################################
+// Publish an artifact into the artifact repository
+// ############################################################################
+apply plugin: 'maven-publish'
+
+ext.fullRepoUrl = "$config.binaryRepository.url/artifactory/$config.binaryRepository.name"
+
+publishing {
+	publications {
+		maven(MavenPublication) {
+			artifact("build/distributions/${rootProject.name}-${project.name}-${version}-${config.environment}.zip") {
+				classifier "${config.environment}"
+			}
+		}
+	}
+
+	repositories {
+		maven {
+			url fullRepoUrl
+
+			credentials {
+				username = config.artifactRepository.username
+				password = config.artifactRepository.password
+			}
+		}
+	}
+}
