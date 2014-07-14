@@ -57,21 +57,64 @@ jenkins {
 
                 configure { project ->
 
-                    // pipeline
-                    (project / 'properties').appendNode("se.diabol.jenkins.pipeline.PipelineProperty", [ 'plugin' : 'delivery-pipeline-plugin@0.8.2']) << {
-                        stageName 'BUILD'
-                    }
-
-                    // build name setter
-                    (project / buildWrappers).appendNode("org.jenkinsci.plugins.buildnamesetter.BuildNameSetter", [ 'plugin' : 'build-name-setter@1.3']) << {
-                        template 'NAME#${BUILD_NUMBER}'
-                    }
-
                     // mask passwords
                     (project / buildWrappers).appendNode("com.michelin.cio.hudson.plugins.maskpasswords.MaskPasswordsBuildWrapper")
 
                 }
 
+            }
+        }
+        // Template for all tasks in the build phase (except the initial job - it needs to be configured separately.)
+        build {
+            dsl {
+                using "base"
+
+                configure { project -> 
+                    // pipeline
+                    (project / 'properties').appendNode("se.diabol.jenkins.pipeline.PipelineProperty", [ 'plugin' : 'delivery-pipeline-plugin@0.8.2']) << {
+                        stageName 'BUILD'
+                    }
+                    // build name setter
+                    (project / buildWrappers).appendNode("org.jenkinsci.plugins.buildnamesetter.BuildNameSetter", [ 'plugin' : 'build-name-setter@1.3']) << {
+                        template 'NAME#${ENV,var="SOURCE_BUILD_NUMBER"}'
+                    }
+                }
+
+                scm {
+                    cloneWorkspace("${rootProject.name}_initial", 'Successful')
+                }
+            }
+
+        }
+        // Template for jobs in the CI phase
+        ci {
+            dsl {
+                using "base"
+
+                configure { project -> 
+                    // pipeline
+                    (project / 'properties').appendNode("se.diabol.jenkins.pipeline.PipelineProperty", [ 'plugin' : 'delivery-pipeline-plugin@0.8.2']) << {
+                        stageName 'CI'
+                    }
+                    // build name setter
+                    (project / buildWrappers).appendNode("org.jenkinsci.plugins.buildnamesetter.BuildNameSetter", [ 'plugin' : 'build-name-setter@1.3']) << {
+                        template 'NAME#${ENV,var="SOURCE_BUILD_NUMBER"}'
+                    }
+                }
+            }
+        }
+
+        // Template for jobs in the 'QA' Phase
+        qa {
+            dsl {
+                using "base"
+            }
+        }
+
+        // Template for jobs in the Production phase
+        prod {
+            dsl {
+                using "base"
             }
         }
     }
@@ -83,10 +126,12 @@ jenkins {
         // ####################################################################
         // Step 1: Initial job, triggers after every checking (commit stage)
         // ####################################################################
-        "${rootProject.name}-initial" {
+        "${rootProject.name}_initial" {
             dsl {
 
-                using "base"
+                using "build"
+
+                description 'Checks for Changes in the SCM, compiles the code and runs the unit tests (not integration tests though).'
 
                 scm {
                     git( "${config.scm.git.url}" )
@@ -98,9 +143,21 @@ jenkins {
                     scm 'H/5 * * * *'
                 }
 
+                configure { project ->
+                    // pipeline
+                    (project / 'builders').appendNode("se.diabol.jenkins.pipeline.PipelineProperty", [ 'plugin' : 'delivery-pipeline-plugin@0.8.2']) << {
+                        stageName 'BUILD'
+                    }
+                    
+                    // build name setter
+                    (project / 'builders').appendNode("org.jenkinsci.plugins.buildnamesetter.BuildNameSetter", [ 'plugin' : 'build-name-setter@1.3']) << {
+                        template 'NAME#${BUILD_NUMBER}'
+                    }
+                }
+                
                 steps {
                     gradle ('clean test', '', true)  {
-                        rootBuildScriptDir 'true'
+                        rootBuildScriptDir true
                         fromRootBuildScriptDir true
                     }
 
@@ -131,7 +188,7 @@ jenkins {
 
                     // Trigger parameterized build on other projects
                     downstreamParameterized {
-                        trigger ("${rootProject.name}-integration-tests", 'SUCCESS', true, ['buildStepFailure': 'FAILURE', 'failure' : 'FAILURE', 'unstable' : 'UNSTABLE']) {
+                        trigger ("${rootProject.name}_integ_tests", 'SUCCESS', true, ['buildStepFailure': 'FAILURE', 'failure' : 'FAILURE', 'unstable' : 'UNSTABLE']) {
                             currentBuild() // Current Build Parameters
                             predefinedProps(['SOUCE_BUILD_NUMBER':'${BUILD_NUMBER}', 'SVN_REVISION' : '${SVN_REVISION}'])
                             setTriggerWithNoParameters false
@@ -146,8 +203,33 @@ jenkins {
         // ####################################################################
         // Step 2: Integration Tests (commit stage)
         // ####################################################################
-        "${rootProject.name}-integration-tests" {
+        "${rootProject.name}_integ_tests" {
             dsl {
+
+                using "build"
+
+                description 'Runs the integration tests (long lasting unittests or tests with external resources).'
+
+                steps {
+                    gradle ('integrationTest', '', true)  {
+                        rootBuildScriptDir true
+                        fromRootBuildScriptDir true
+                    }
+
+                }
+
+                publishers {
+
+                    // Trigger parameterized build on other projects
+                    downstreamParameterized {
+                        trigger ("${rootProject.name}_code_quality", 'SUCCESS', true, ['buildStepFailure': 'FAILURE', 'failure' : 'FAILURE', 'unstable' : 'UNSTABLE']) {
+                            currentBuild() // Current Build Parameters
+                            predefinedProps(['SOUCE_BUILD_NUMBER':'${BUILD_NUMBER}', 'SVN_REVISION' : '${SVN_REVISION}'])
+                            setTriggerWithNoParameters false
+                        }
+                    }
+
+                }
 
             }
         }
@@ -155,63 +237,233 @@ jenkins {
         // ####################################################################
         // Step 3: Code Analysis (commit stage)
         // ####################################################################
-        "${rootProject.name}-code-analysis" {
+        "${rootProject.name}_code_quality" {
             dsl {
-            
+
+                using "build"
+
+                description 'Checks the cod quality with sonar. <a href="${config.jenkins.url}/dashboard/index/GROUP:NAME">Sonar</a>'
+
+                steps {
+                    gradle ('sonarRunner', '', true)  {
+                        rootBuildScriptDir true
+                        fromRootBuildScriptDir true
+                    }
+
+                }
+
+                publishers {
+
+                    // Trigger parameterized build on other projects
+                    downstreamParameterized {
+                        trigger ("${rootProject.name}_distribution", 'SUCCESS', true, ['buildStepFailure': 'FAILURE', 'failure' : 'FAILURE', 'unstable' : 'UNSTABLE']) {
+                            currentBuild() // Current Build Parameters
+                            predefinedProps(['SOUCE_BUILD_NUMBER':'${BUILD_NUMBER}', 'SVN_REVISION' : '${SVN_REVISION}'])
+                            setTriggerWithNoParameters false
+                        }
+                    }
+
+                }
+
             }
         }
 
         // ####################################################################
         // Step 4: Assemble & Publish (commit stage)
         // ####################################################################
-        "${rootProject.name}-distribution" {
+        "${rootProject.name}_distribution" {
             dsl {
-            
+
+                using "build"
+
+                description 'Builds the artifacts for each environment'
+
+                steps {
+                    gradle ('build distZip publish', '-Penv=${env}', true)  {
+                        rootBuildScriptDir true
+                        fromRootBuildScriptDir true
+                    }
+
+                }
+
+                publishers {
+
+                    // Trigger parameterized build on other projects
+                    downstreamParameterized {
+                        trigger ("${rootProject.name}_deploy_int", 'SUCCESS', true, ['buildStepFailure': 'FAILURE', 'failure' : 'FAILURE', 'unstable' : 'UNSTABLE']) {
+                            currentBuild() // Current Build Parameters
+                            predefinedProps(['SOUCE_BUILD_NUMBER':'${BUILD_NUMBER}', 'SVN_REVISION' : '${SVN_REVISION}'])
+                            setTriggerWithNoParameters false
+                        }
+                    }
+
+                }
+
             }
         }
 
         // ####################################################################
         // Step 5: Deploy Integration (acceptance stage)
         // ####################################################################
-        "${rootProject.name}-deploy_int" {
+        "${rootProject.name}_deploy_int" {
             dsl {
-            
+
+                using "ci"
+
+                description 'Installs the project on the integration server <a href="${config.environments.integration.server.url}">${config.environments.integration.server.url}</a>'
+
+                scm {
+                    svn("${config.scm.git.url}" + '@${SVN_REVISION}')
+                }
+
+                steps {
+                    gradle ('autoinstall', '-Penv=integration', true)  {
+                        rootBuildScriptDir true
+                        fromRootBuildScriptDir true
+                    }
+
+                }
+
+                publishers {
+
+                    // Trigger parameterized build on other projects
+                    downstreamParameterized {
+                        trigger ("${rootProject.name}_acceptance_tests", 'SUCCESS', true, ['buildStepFailure': 'FAILURE', 'failure' : 'FAILURE', 'unstable' : 'UNSTABLE']) {
+                            currentBuild() // Current Build Parameters
+                            predefinedProps(['SOUCE_BUILD_NUMBER':'${BUILD_NUMBER}', 'SVN_REVISION' : '${SVN_REVISION}'])
+                            setTriggerWithNoParameters false
+                        }
+                    }
+
+                }
+
             }
         }
 
         // ####################################################################
         // Step 6: Acceptance Tests (acceptance stage)
         // ####################################################################
-        "${rootProject.name}-acceptance_tests" {
+        "${rootProject.name}_acceptance_tests" {
             dsl {
-            
+
+                using "ci"
+
+                description 'Runs the acceptance tests on the integration server.'
+
+                steps {
+                    // TODO
+                }
+
+                publishers {
+
+                    // Trigger parameterized build on other projects
+                    downstreamParameterized {
+                        trigger ("${rootProject.name}_performance_test", 'SUCCESS', true, ['buildStepFailure': 'FAILURE', 'failure' : 'FAILURE', 'unstable' : 'UNSTABLE']) {
+                            currentBuild() // Current Build Parameters
+                            predefinedProps(['SOUCE_BUILD_NUMBER':'${BUILD_NUMBER}', 'SVN_REVISION' : '${SVN_REVISION}'])
+                            setTriggerWithNoParameters false
+                        }
+                    }
+
+                }
+
             }
         }
 
         // ####################################################################
         // Step 7: Performance Tests (acceptance stage)
         // ####################################################################
-        "${rootProject.name}-performance_tests" {
+        "${rootProject.name}_performance_tests" {
             dsl {
-            
+
+                using "ci"
+
+                description 'Runs the performance tests (jmeter) on the integration server.'
+
+                steps {
+                    // TODO
+                }
+
+                publishers {
+
+                    // Trigger parameterized build on other projects
+                    downstreamParameterized {
+                        trigger ("${rootProject.name}_deploy_test", 'SUCCESS', true, ['buildStepFailure': 'FAILURE', 'failure' : 'FAILURE', 'unstable' : 'UNSTABLE']) {
+                            currentBuild() // Current Build Parameters
+                            predefinedProps(['SOUCE_BUILD_NUMBER':'${BUILD_NUMBER}', 'SVN_REVISION' : '${SVN_REVISION}'])
+                            setTriggerWithNoParameters false
+                        }
+                    }
+
+                }
+
             }
         }
 
         // ####################################################################
         // Step 8: Deploy to Test (trigger manually)
         // ####################################################################
-        "${rootProject.name}-deploy_test" {
+        "${rootProject.name}_deploy_test" {
             dsl {
-            
+
+                using "qa"
+
+                description 'Installs the project on the test server <a href="${config.environments.test.server.url}">${config.environments.test.server.url}</a>'
+
+                scm {
+                    svn("${config.scm.git.url}" + '@${SVN_REVISION}')
+                }
+
+                steps {
+                    gradle ('writeVersionFile autoinstall', '-Penv=test', true)  {
+                        rootBuildScriptDir true
+                        fromRootBuildScriptDir true
+                    }
+
+                }
+
+                publishers {
+
+                    // Trigger parameterized build on other projects
+                    downstreamParameterized {
+                        trigger ("${rootProject.name}_deploy_prod", 'SUCCESS', true, ['buildStepFailure': 'FAILURE', 'failure' : 'FAILURE', 'unstable' : 'UNSTABLE']) {
+                            currentBuild() // Current Build Parameters
+                            predefinedProps(['SOUCE_BUILD_NUMBER':'${BUILD_NUMBER}', 'SVN_REVISION' : '${SVN_REVISION}'])
+                            setTriggerWithNoParameters false
+                        }
+                    }
+
+                }
+
             }
         }
 
         // ####################################################################
         // Step 9: Deploy to Prod (trigger manually)
         // ####################################################################
-        "${rootProject.name}-deploy_prod" {
+        "${rootProject.name}_deploy_prod" {
             dsl {
-            
+
+                using "prod"
+
+                description 'Installs the project on the prod server <a href="${config.environments.test.server.url}">${config.environments.test.server.url}</a>'
+
+                scm {
+                    svn("${config.scm.git.url}" + '@${SVN_REVISION}')
+                }
+
+                steps {
+                    gradle ('autoinstall', '-Penv=prod', true)  {
+                        rootBuildScriptDir true
+                        fromRootBuildScriptDir true
+                    }
+
+                }
+
+                publishers {
+
+                }
+
             }
         }
          
