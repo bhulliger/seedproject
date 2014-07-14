@@ -58,19 +58,17 @@ jenkins {
                 configure { project ->
 
                     // pipeline
-                    def properties = project / properties
-                    properties.appendNode("se.diabol.jenkins.pipeline.PipelineProperty", [ 'plugin' : 'delivery-pipeline-plugin@0.8.2']) << {
+                    (project / 'properties').appendNode("se.diabol.jenkins.pipeline.PipelineProperty", [ 'plugin' : 'delivery-pipeline-plugin@0.8.2']) << {
                         stageName 'BUILD'
                     }
 
                     // build name setter
-                    def buildWrappers = project / buildWrappers
-                    buildWrappers.appendNode("org.jenkinsci.plugins.buildnamesetter.BuildNameSetter", [ 'plugin' : 'build-name-setter@1.3']) << {
+                    (project / buildWrappers).appendNode("org.jenkinsci.plugins.buildnamesetter.BuildNameSetter", [ 'plugin' : 'build-name-setter@1.3']) << {
                         template 'NAME#${BUILD_NUMBER}'
                     }
 
                     // mask passwords
-                    buildWrappers.appendNode("com.michelin.cio.hudson.plugins.maskpasswords.MaskPasswordsBuildWrapper")
+                    (project / buildWrappers).appendNode("com.michelin.cio.hudson.plugins.maskpasswords.MaskPasswordsBuildWrapper")
                 }
 
             }
@@ -102,6 +100,10 @@ jenkins {
                         rootBuildScriptDir 'true'
                         fromRootBuildScriptDir 'true'
                     }
+
+                }
+
+                publishers {
 
                 }
             }
