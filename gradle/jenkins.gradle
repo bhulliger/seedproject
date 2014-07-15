@@ -1,5 +1,4 @@
 apply plugin: "com.terrafolio.jenkins"
-
 jenkins {
     servers {
         testing {
@@ -16,30 +15,37 @@ jenkins {
     // View for the project 
     // ########################################################################
     views {
-
+        
         dsl {
+
             view {
                 name "${rootProject.name}"
-                description "Build Queue for the project ${rootProject.name}"
-                
-                /* TODO: doesn't work. 
-                jobs {
-                    regex "${rootProject.name}-[a-zA-Z\\-_]+"   
+                description "Build jobs for the project ${rootProject.name}"
+
+                configure { view ->
+                    view / 'includeRegex' << "${rootProject.name}-[a-zA-Z\\-_]+"
                 }
-                */
 
                 columns {
                     buildButton()
-                    lastDuration()
-                    lastFailure()
-                    lastSuccess()
-                    name()
                     status()
                     weather()
+                    name()
+                    lastSuccess()
+                    lastFailure()
+                    lastDuration()
                 }
-            } 
+            }
+
+            view {
+                // type "BuildPipelineView"
+                // TODO
+                name "${rootProject.name}-pipeline"
+                description "Build Pipeline for the project ${rootProject.name}"
+
+               
+            }
         }
-        
     }
 
     // ########################################################################
@@ -148,6 +154,7 @@ jenkins {
     // Jobs 
     // ########################################################################
     jobs {
+
         // ####################################################################
         // Step 1.1: Initial job, triggers after every checking (commit stage)
         // ####################################################################
@@ -176,7 +183,7 @@ jenkins {
                     
                     // build name setter
                     (project / buildWrappers).appendNode("org.jenkinsci.plugins.buildnamesetter.BuildNameSetter", [ 'plugin' : 'build-name-setter@1.3']) << {
-                        template "${rootProject.name}" + '#${BUILD_NUMBER}'
+                        template "${rootProject.name}" + '#${SOURCE_BBUILD_NUMBER}'
                     }
 
                     // mailer
@@ -188,9 +195,8 @@ jenkins {
                 }
                 
                 steps {
-                    gradle ('clean test', '', true) {
-                        rootBuildScriptDir "true"
-                        fromRootBuildScriptDir true
+                    gradle ('clean test', '', true) { node ->
+                        node / fromRootBuildScriptDir << true
                     }
 
                 }
@@ -215,9 +221,6 @@ jenkins {
 
                     }
 
-                    // Email Notification
-                    extendedEmail 'bhu@ims.ch'
-
                     // Trigger parameterized build on other projects
                     downstreamParameterized {
                         trigger ("${rootProject.name}-integration_tests", 'SUCCESS', true, ['buildStepFailure': 'FAILURE', 'failure' : 'FAILURE', 'unstable' : 'UNSTABLE']) {
@@ -229,7 +232,6 @@ jenkins {
 
                 }
             }
-            
         }
 
         // ####################################################################
@@ -243,14 +245,15 @@ jenkins {
                 description 'Runs the integration tests (long lasting unittests, tests with external resources, tests that are hard to maintain).'
 
                 steps {
-                    gradle ('integrationTest', '', true)  {
-                        rootBuildScriptDir true
-                        fromRootBuildScriptDir true
+                    gradle ('integrationTest', '', true) { node -> 
+                        node / fromRootBuildScriptDir << true
                     }
 
                 }
 
                 publishers {
+                    // Archive for Clone Workspace SCM
+                    publishCloneWorkspace '**/*', '', 'Successful', 'TAR', false
 
                     // Trigger parameterized build on other projects
                     downstreamParameterized {
@@ -274,12 +277,11 @@ jenkins {
 
                 using "commit"
 
-                description 'Perform code health check. Fail build for low quality, Record progress over time. (<a href="${config.jenkins.url}/dashboard/index/GROUP:NAME">Sonar</a>)'
+                description "Perform code health check. Fail build for low quality, Record progress over time. (<a href='${config.jenkins.url}/dashboard/index/GROUP:NAME'>Sonar</a>)"
 
                 steps {
-                    gradle ('sonarRunner', '', true)  {
-                        rootBuildScriptDir true
-                        fromRootBuildScriptDir true
+                    gradle ('sonarRunner', '', true) { node -> 
+                        node / fromRootBuildScriptDir << true
                     }
 
                 }
@@ -290,7 +292,7 @@ jenkins {
                     downstreamParameterized {
                         trigger ("${rootProject.name}-assemble", 'SUCCESS', true, ['buildStepFailure': 'FAILURE', 'failure' : 'FAILURE', 'unstable' : 'UNSTABLE']) {
                             currentBuild() // Current Build Parameters
-                            predefinedProps(['SOUCE_BUILD_NUMBER':'${BUILD_NUMBER}', 'SVN_REVISION' : '${SVN_REVISION}'])
+                            predefinedProps(['SOUCE_BUILD_NUMBER':'${SOURCE_BUILD_NUMBER}', 'SVN_REVISION' : '${SVN_REVISION}'])
                             setTriggerWithNoParameters false
                         }
                     }
@@ -306,14 +308,15 @@ jenkins {
         "${rootProject.name}-assemble" {
             dsl {
 
+                type "Matrix"
+
                 using "commit"
 
                 description 'Assembles the distribution without environmental configuration. Includes the Build information. Choose versioning strategy.'
 
                 steps {
-                    gradle ('assemble', '-Penv=${env}', true)  {
-                        rootBuildScriptDir true
-                        fromRootBuildScriptDir true
+                    gradle ('assemble', '-Penv=${env}', true) { node -> 
+                        node / fromRootBuildScriptDir << true
                     }
 
                 }
@@ -331,6 +334,17 @@ jenkins {
 
                 }
 
+                configure { job -> 
+
+                    def axes = job / 'axes' / 'hudson.matrix.TextAxis'
+                    axes / 'name' << 'Umgebung'
+                    def environments = axes / 'values'
+                    environments / 'string' << integration
+                    environments / 'string' << test
+                    environments / 'string' << prod
+
+                }
+
             }
         }
 
@@ -345,9 +359,8 @@ jenkins {
                 description 'Version artifact(s). Use binary repository, publish once, then reuse.'
 
                 steps {
-                    gradle ('publish', '-Penv=${env}', true)  {
-                        rootBuildScriptDir true
-                        fromRootBuildScriptDir true
+                    gradle ('publish', '-Penv=${env}', true) { node -> 
+                        node / fromRootBuildScriptDir << true
                     }
 
                 }
@@ -383,9 +396,8 @@ jenkins {
                 }
 
                 steps {
-                    gradle ('deploy', '-Penv=integration', true)  {
-                        rootBuildScriptDir true
-                        fromRootBuildScriptDir true
+                    gradle ('deploy', '-Penv=integration', true) { node -> 
+                        node / fromRootBuildScriptDir << true
                     }
 
                 }
@@ -417,9 +429,8 @@ jenkins {
                 description 'Runs the acceptance tests (all UI permutations, important use cases, different envs) on the integration server.'
 
                 steps {
-                    gradle ('functionalTest', '-Penv=integration', true)  {
-                        rootBuildScriptDir true
-                        fromRootBuildScriptDir true
+                    gradle ('functionalTest', '-Penv=integration', true) { node -> 
+                        node / fromRootBuildScriptDir << true
                     }
                 }
 
@@ -427,7 +438,7 @@ jenkins {
 
                     // Trigger parameterized build on other projects
                     downstreamParameterized {
-                        trigger ("${rootProject.name}-performance_test", 'SUCCESS', true, ['buildStepFailure': 'FAILURE', 'failure' : 'FAILURE', 'unstable' : 'UNSTABLE']) {
+                        trigger ("${rootProject.name}-performance_tests", 'SUCCESS', true, ['buildStepFailure': 'FAILURE', 'failure' : 'FAILURE', 'unstable' : 'UNSTABLE']) {
                             currentBuild() // Current Build Parameters
                             predefinedProps(['SOUCE_BUILD_NUMBER':'${BUILD_NUMBER}', 'SVN_REVISION' : '${SVN_REVISION}'])
                             setTriggerWithNoParameters false
@@ -484,9 +495,8 @@ jenkins {
                 }
 
                 steps {
-                    gradle ('writeVersionFile cargoDeployRemote', '-Penv=test', true)  {
-                        rootBuildScriptDir true
-                        fromRootBuildScriptDir true
+                    gradle ('writeVersionFile cargoDeployRemote', '-Penv=test', true) { node -> 
+                        node / fromRootBuildScriptDir << true
                     }
 
                 }
@@ -522,9 +532,8 @@ jenkins {
                 }
 
                 steps {
-                    gradle ('autoinstall', '-Penv=prod', true)  {
-                        rootBuildScriptDir true
-                        fromRootBuildScriptDir true
+                    gradle ('autoinstall', '-Penv=prod', true) { node -> 
+                        node / fromRootBuildScriptDir << true
                     }
 
                 }
