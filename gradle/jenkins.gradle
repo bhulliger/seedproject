@@ -154,7 +154,7 @@ jenkins {
         "${rootProject.name}-initial" {
             dsl {
 
-                using "commit"
+                using "base"
 
                 description 'Checks for Changes in the SCM, compiles the code and runs the unit tests (not integration tests though). <br/> Goal: Rapid Feedback (<5mins), Run on every checkin, fix broken builds.'
 
@@ -175,14 +175,21 @@ jenkins {
                     }
                     
                     // build name setter
-                    (project / 'builders').appendNode("org.jenkinsci.plugins.buildnamesetter.BuildNameSetter", [ 'plugin' : 'build-name-setter@1.3']) << {
+                    (project / buildWrappers).appendNode("org.jenkinsci.plugins.buildnamesetter.BuildNameSetter", [ 'plugin' : 'build-name-setter@1.3']) << {
                         template "${rootProject.name}" + '#${BUILD_NUMBER}'
+                    }
+
+                    // mailer
+                    (project / publishers).appendNode("hudson.tasks.Mailer", [ 'plugin' : 'mailer@1.9']) << {
+                        recipients config.jenkins.notifications
+                        dontNotifyEveryUnstableBuild false
+                        sendToIndividuals true
                     }
                 }
                 
                 steps {
-                    gradle ('clean test', '', true)  {
-                        rootBuildScriptDir true
+                    gradle ('clean test', '', true) {
+                        rootBuildScriptDir "true"
                         fromRootBuildScriptDir true
                     }
 

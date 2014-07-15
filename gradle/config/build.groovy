@@ -20,11 +20,14 @@ server {
 jenkins {
 	url = "http://localhost:8080" // TODO
 	username = "jenkins" // TODO
-	password = "n0mores3cr3ts" // TODO
+	password = "n0mor3secr3ts" // TODO
 
 	authorization {
-		permission = "admin" // TODO
+		permission = "jenkins" // TODO
 	}
+
+	// comma-separated list of email addresses to be notified on failed builds
+	notifications = ''
 }
 
 sonar {
