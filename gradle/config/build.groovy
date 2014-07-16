@@ -2,7 +2,10 @@
 // Global Configuration Variables
 // ############################################################################
 templates {
-	path = "C:/work/sandbox/seedproject_templates/"
+	scm = "https://github.com/bhulliger/seedproject_templates.git"
+	treeish = 'd0bb3d286c203aa023d6d42fc9d6e1d62596dee7'
+	path = "_templates"
+
 }	
 
 // ############################################################################

@@ -58,8 +58,8 @@ buildscript {
 
 	dependencies {
 		classpath "com.terrafolio:gradle-jenkins-plugin:1.2.1"
-		// classpath "org.jenkins-ci.plugins:job-dsl-core:1.24"
-		// classpath "org.codehaus.groovy.modules.http-builder:http-builder:0.5.0"
+		// classpath 'org.ajoberstar:gradle-git:0.9.0'
+		classpath 'com.palominolabs.gradle.task:gradle-git-clone-task:0.0.2'
 	}
 }
 
@@ -162,7 +162,7 @@ subprojects {
 	task initProject(type: Copy) {
 		description "initializes the project structure with all required packages and build files."
 
-		from "$config.templates.path/skeleton/" + project.path.replaceAll(":", "/")
+		from "$rootDir/$config.templates.path/skeleton/" + project.path.replaceAll(":", "/")
 		into "$rootDir" + project.path.replaceAll(":", "/")
 
 		if (project.getChildProjects().isEmpty()) {
@@ -180,16 +180,38 @@ subprojects {
 	// ########################################################################
 	task scaffold(dependsOn: initProject) {
 		description "Scaffolds a basic application based on the provided template structure (in dist/src/main/resources/build.groovy)"
-		ext.templateBasePath = config.templates.path + "/scaffolding/" + project.path.replaceAll(":", "/") + "/"
+		ext.templateBasePath = "$rootDir/$config.templates.path" + "/scaffolding/" + project.path.replaceAll(":", "/") + "/"
 	}
 
 }
 
 
-task initProject(type: Copy) {
+
+// ############################################################################
+// Scaffolding
+// ############################################################################
+//import org.ajoberstar.gradle.git.tasks.*
+task cloneRepo(type: com.palominolabs.gradle.task.git.clone.GitCloneTask) {
+    def destination = file("$rootDir/$config.templates.path")
+    uri = config.templates.scm
+    dir = destination
+    treeish = config.templates.treeish
+    
+    //	enabled = !destination.exists() //to clone only once
+}
+
+task initProject(type: Copy, dependsOn: cloneRepo) {
 	description "initializes the root project with the distribution files."
-	from "$config.templates.path/skeleton/dist" 
+	from "$rootDir/$config.templates.path/skeleton/dist" 
 	into "dist"
+}
+
+task scaffold(dependsOn: cloneRepo) {
+	dependsOn subprojects.scaffold
+	doLast {
+		delete "$rootDir/$config.templates.path"
+	}
+
 }
 
 // ############################################################################
