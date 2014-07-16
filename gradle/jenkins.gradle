@@ -18,11 +18,12 @@ jenkins {
         
         dsl {
 
-            view {
+            view(type: "ListView") {
                 name "${rootProject.name}"
                 description "Build jobs for the project ${rootProject.name}"
 
                 configure { view ->
+
                     view / 'includeRegex' << "${rootProject.name}-[a-zA-Z\\-_]+"
                 }
 
@@ -37,13 +38,11 @@ jenkins {
                 }
             }
 
-            view {
-                // type "BuildPipelineView"
-                // TODO
+                
+            view (type: "BuildPipelineView") {
                 name "${rootProject.name}-pipeline"
                 description "Build Pipeline for the project ${rootProject.name}"
-
-               
+                selectedJob "${rootProject.name}-initial"               
             }
         }
     }
@@ -307,10 +306,23 @@ jenkins {
         // ####################################################################
         "${rootProject.name}-assemble" {
             dsl {
-
-                type "Matrix"
-
                 using "commit"
+
+                configure { project -> 
+
+                    project.name = 'matrix-project'
+
+                    project / axes / 'hudson.matrix.TextAxis' {
+                        name 'Umgebung'
+                        values {
+
+                            config.jenkins.axes.each {
+                                string it
+                            }
+                        } 
+                    }
+                }
+
 
                 description 'Assembles the distribution without environmental configuration. Includes the Build information. Choose versioning strategy.'
 
@@ -331,17 +343,6 @@ jenkins {
                             setTriggerWithNoParameters false
                         }
                     }
-
-                }
-
-                configure { job -> 
-
-                    def axes = job / 'axes' / 'hudson.matrix.TextAxis'
-                    axes / 'name' << 'Umgebung'
-                    def environments = axes / 'values'
-                    environments / 'string' << integration
-                    environments / 'string' << test
-                    environments / 'string' << prod
 
                 }
 

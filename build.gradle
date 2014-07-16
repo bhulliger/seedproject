@@ -32,12 +32,12 @@ task wrapper(type: Wrapper) {
 	gradleVersion = '2.0'
 }
 
-println '######################################################################'
+println '#####################################################################'
 println "# Environment: 	$env"
 println "# Version: 	"	+ version
 println "# Group: 	"		+  group
 println "# Build Date: 	" 	+ new Date()  
-println '######################################################################'
+println '#####################################################################'
 
 // ############################################################################
 // QA & Code Analysis
@@ -49,11 +49,17 @@ apply from: "$rootDir/gradle/codeanalysis.gradle"
 // ############################################################################
 buildscript {
 	repositories {
+		maven {
+			url "http://artifactory.ims.ch:8081/artifactory/public/"
+		}
 		jcenter()
+		mavenCentral()
 	}
 
 	dependencies {
 		classpath "com.terrafolio:gradle-jenkins-plugin:1.2.1"
+		// classpath "org.jenkins-ci.plugins:job-dsl-core:1.24"
+		// classpath "org.codehaus.groovy.modules.http-builder:http-builder:0.5.0"
 	}
 }
 

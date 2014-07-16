@@ -26,6 +26,8 @@ jenkins {
 		permission = "jenkins" // TODO
 	}
 
+	axes = [ 'integration', 'test', 'prod' ]
+
 	// comma-separated list of email addresses to be notified on failed builds
 	notifications = ''
 }
