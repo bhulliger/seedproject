@@ -209,7 +209,10 @@ task initProject(type: Copy, dependsOn: cloneRepo) {
 task scaffold(dependsOn: cloneRepo) {
 	dependsOn subprojects.scaffold
 	doLast {
-		delete "$rootDir/$config.templates.path"
+		if (config.os.type != 'win') {
+			// the gradle job prohibits to delete the templates dir in windows.
+			delete "$rootDir/$config.templates.path"
+		}
 	}
 
 }

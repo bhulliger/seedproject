@@ -8,3 +8,4 @@ app/mobile/war
 .settings
 bin
 .classpath
+_templates
