@@ -8,7 +8,7 @@ templates {
 }	
 
 // ############################################################################
-// Operating System & Server
+// Operating System & Servers
 // ############################################################################
 os {
 	type = "unix" // unix / win
@@ -23,39 +23,47 @@ server {
 }
 
 jenkins {
-	url = "http://localhost:8080" // TODO
+
+	url = "<jenkins url>" // url where jenkins can be reached
+
 	username = "" // (optional). username can be provided by -DjenkinsUser=<username> for jenkins jobs
 	password = "" // (optional). password can be provided by -DjenkinsPassword=<password> for jenkins jobs
 
+	// project-based security: User or group that has access to the project. 
 	authorization {
-		permission = "jenkins" // TODO
+		permission = "<jenkins permission>" // Optional
 	}
 
+	// credentials ID for scm access. the credentials ID must be accessed from the jenkins configuration file.
 	scm {
-		credentialsId = '50df870f-a222-416c-8217-719d80b645d1'
+		credentialsId = '<credentialId from jenkins configuration file>' // TODO
 	}
 
+	// Environment definition (or android flavors) for 'Build multi-configuration project'-Job (distribution job)
 	axes = [ 'integration', 'test', 'prod' ]
 
 	// comma-separated list of email addresses to be notified on failed builds
-	notifications = ''
+	notifications = '' 
 }
 
 sonar {
 	host {
-		url = "http://localhost:9000"
+		url = "<sonar url>" // URL where sonar can be reached
 	}
 	jdbc {
-		url = "" // TODO
-		driverClassName = "" // TODO
-		username = "" // TODO
-		password = "" // TODO
+		// JDBC Configuration for the sonar server. These configurations can be found in your sonar.properties 
+		// file in your sonar intallation.
+		url = "<jdbc url of sonar configuration>" // jdbc url of sonar
+		driverClassName = "<driverClass>" // jdbc driver class
+		username = "<sonarUser>" // db username for sonar
+		password = "<sonarPassword>" // db password for sonar
 	}
-	projectName = "" // TODO
-	projectKey = "" // TODO
-	exclusions = "" // TODO
+
+	projectName = "<sonarProjectName>" // human readable project name in sonar
+	projectKey = "<sonarProjectKey>" // project key in sonar
+	exclusions = "" // (Optional) regex pattern for file exclusions
 	jacoco {	
-		excludes = ""; // TODO
+		excludes = ""; // (Optional). regex patterns for jacoco exclusions
 	}
 }
 
@@ -69,11 +77,11 @@ scm {
 // Artifacts
 // ############################################################################
 artifactRepository {
-	url = "" // TODO
-	username = ""
-	password = ""
-	name = ""
-	publicRepo = "" 
+	url = "<artifactoryURL>" // The context URL of your artifactory
+	username = "<artifactoryUser>" // Credentials to upload artifacts
+	password = "<artifactoryPassword>" // ''
+	name = "<artifactoryName>" // name of your artifact repository
+	publicRepo = "<artifactoryPublicRepo>" // public repo name of the artifact repository
 }
 
 // ############################################################################
