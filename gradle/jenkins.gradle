@@ -165,7 +165,9 @@ jenkins {
                 description 'Checks for Changes in the SCM, compiles the code and runs the unit tests (not integration tests though). <br/> Goal: Rapid Feedback (<5mins), Run on every checkin, fix broken builds.'
 
                 scm {
-                    git( "${config.scm.git.url}" )
+                    git( "${config.scm.git.url}" ) { git ->
+                        (git / 'userRemoteConfigs' / 'hudson.plugins.git.UserRemoteConfig' / 'credentialsId') << config.jenkins.scm.credentialsId
+                    }
                     // svn( "${config.scm.svn.url}" )
                 }
 
@@ -182,7 +184,7 @@ jenkins {
                     
                     // build name setter
                     (project / buildWrappers).appendNode("org.jenkinsci.plugins.buildnamesetter.BuildNameSetter", [ 'plugin' : 'build-name-setter@1.3']) << {
-                        template "${rootProject.name}" + '#${SOURCE_BBUILD_NUMBER}'
+                        template "${rootProject.name}" + '#${SOURCE_BUILD_NUMBER}'
                     }
 
                     // mailer
@@ -194,7 +196,7 @@ jenkins {
                 }
                 
                 steps {
-                    gradle ('clean test', '', true) { node ->
+                    gradle ('initProject scaffold clean test', '', true) { node ->
                         node / fromRootBuildScriptDir << true
                     }
 

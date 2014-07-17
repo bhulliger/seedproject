@@ -197,7 +197,7 @@ task cloneRepo(type: com.palominolabs.gradle.task.git.clone.GitCloneTask) {
     dir = destination
     treeish = config.templates.treeish
     
-    //	enabled = !destination.exists() //to clone only once
+    enabled = !destination.exists() //to clone only once
 }
 
 task initProject(type: Copy, dependsOn: cloneRepo) {

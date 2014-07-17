@@ -29,6 +29,10 @@ jenkins {
 		permission = "jenkins" // TODO
 	}
 
+	scm {
+		credentialsId = '50df870f-a222-416c-8217-719d80b645d1'
+	}
+
 	axes = [ 'integration', 'test', 'prod' ]
 
 	// comma-separated list of email addresses to be notified on failed builds
