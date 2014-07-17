@@ -101,19 +101,19 @@ jenkins {
 ```
 sonar {
 	host {
-		url = "**<sonar url>**" // URL where sonar can be reached
+		url = "<sonar url>" // URL where sonar can be reached
 	}
 	jdbc {
 		// JDBC Configuration for the sonar server. These configurations can be found in your sonar.properties 
 		// file in your sonar intallation.
-		url = "**<jdbc url of sonar configuration>**" // jdbc url of sonar
-		driverClassName = "**<driverClass>**" // jdbc driver class
-		username = "**<sonarUser>**" // db username for sonar
-		password = "**<sonarPassword>**" // db password for sonar
+		url = "<jdbc url of sonar configuration>" // jdbc url of sonar
+		driverClassName = "<driverClass>" // jdbc driver class
+		username = "<sonarUser>" // db username for sonar
+		password = "<sonarPassword>" // db password for sonar
 	}
 
-	projectName = "**<sonarProjectName>**" // human readable project name in sonar
-	projectKey = "**<sonarProjectKey>**" // project key in sonar
+	projectName = "<sonarProjectName>" // human readable project name in sonar
+	projectKey = "<sonarProjectKey>" // project key in sonar
 	exclusions = "" // (Optional) regex pattern for file exclusions
 	jacoco {	
 		excludes = ""; // (Optional). regex patterns for jacoco exclusions
@@ -127,11 +127,11 @@ sonar {
 ```
 
 artifactRepository {
-	url = "**<artifactoryURL>**" // The context URL of your artifactory
-	username = "**<artifactoryUser>**" // Credentials to upload artifacts
-	password = "**<artifactoryPassword>**" // ''
-	name = "**<artifactoryName>**" // name of your artifact repository
-	publicRepo = "**<artifactoryPublicRepo>**" // public repo name of the artifact repository
+	url = "<artifactoryURL>" // The context URL of your artifactory
+	username = "<artifactoryUser>" // Credentials to upload artifacts
+	password = "<artifactoryPassword>" // ''
+	name = "<artifactoryName>" // name of your artifact repository
+	publicRepo = "<artifactoryPublicRepo>" // public repo name of the artifact repository
 }
 
 
@@ -143,7 +143,7 @@ artifactRepository {
 ```
 environments {
 
-	** ... **
+	...
 
 }
 
@@ -158,5 +158,5 @@ $> gradle updateJenkinsItems -DjenkinsUser=<jenkinsUser> -DjenkinsPassword=<jenk
 
 ```
 
-** Go see your jenkins :-). And happy coding. The rest is on you! **
+**Go see your jenkins :-). And happy coding. The rest is on you!**
 
