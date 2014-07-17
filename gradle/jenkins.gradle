@@ -60,8 +60,10 @@ jenkins {
                     permissionAll "${config.jenkins.authorization.permission}"
                 }
 
-                steps {
-                    shell('chmod +x $WORKSPACE/gradlew')
+                if (config.os.type != 'win') {
+                    steps {
+                        shell('chmod +x $WORKSPACE/gradlew')
+                    }
                 }
 
                 configure { project ->
@@ -77,13 +79,16 @@ jenkins {
 
                 
                 scm {
-                    git( "${config.scm.git.url}" ) { git ->
-                        (git / 'userRemoteConfigs' / 'hudson.plugins.git.UserRemoteConfig' / 'credentialsId') << config.jenkins.scm.credentialsId
+                    if (config.scm.type == 'git') {
+                        git( "${config.scm.url}" ) { git ->
+                            (git / 'userRemoteConfigs' / 'hudson.plugins.git.UserRemoteConfig' / 'credentialsId') << config.jenkins.scm.credentialsId
+                        }
+                    } else if (config.scm.type == 'svn') {
+                        svn("${config.scm.url}") { svn ->
+                            (svn / 'locations' / 'hudson.scm.SubversionSCM_-ModuleLocation' / 'credentialsId') << config.jenkins.scm.credentialsId
+                        }
                     }
 
-                    /*svn("${config.scm.svn.url}") { svn ->
-                        (svn / 'locations' / 'hudson.scm.SubversionSCM_-ModuleLocation' / 'credentialsId') << config.jenkins.scm.credentialsId
-                    }*/
                 }
 
             }
@@ -121,13 +126,17 @@ jenkins {
                 }
 
                 scm {
-                    git( "${config.scm.git.url}", '${COMMIT}') { git ->
-                        (git / 'userRemoteConfigs' / 'hudson.plugins.git.UserRemoteConfig' / 'credentialsId') << config.jenkins.scm.credentialsId
+                    if (config.scm.type == 'git') {
+                        git( "${config.scm.url}", '${COMMIT}') { git ->
+                            (git / 'userRemoteConfigs' / 'hudson.plugins.git.UserRemoteConfig' / 'credentialsId') << config.jenkins.scm.credentialsId
+                        }
+                    } else if (config.scm.type == 'svn') {
+
+                        svn("${config.scm.url}" + '@${SVN_REVISION}' ) { svn ->
+                            (svn / 'locations' / 'hudson.scm.SubversionSCM_-ModuleLocation' / 'credentialsId') << config.jenkins.scm.credentialsId
+                        }
                     }
-                    /*
-                    svn("${config.scm.svn.url}" + '@${SVN_REVISION}' ) { svn ->
-                        (svn / 'locations' / 'hudson.scm.SubversionSCM_-ModuleLocation' / 'credentialsId') << config.jenkins.scm.credentialsId
-                    }*/
+                    
                 }
             }
         }
@@ -179,7 +188,7 @@ jenkins {
                 }
                 
                 steps {
-                    gradle ('clean test', '', true) { node ->
+                    gradle ('scaffold clean test', '', true) { node ->
                         node / fromRootBuildScriptDir << true
                     }
 
@@ -481,27 +490,33 @@ jenkins {
                     // ########################################################
                     // Git Publisher (publish tag)
                     // ########################################################
-                    (project/publishers/'hudson.plugins.git.GitPublisher') << {
-                        configVersion 2
-                        pushMerge true
-                        pushOnlyIfSuccess true
-                        tagsToPush {
-                            'hudson.plugins.git.GitPublisher_-TagToPush' {
-                                targetRepoName "RepoName"
-                                tagName '${env[\'RELEASE_VERSION\']}'
-                                tagMessage 'Release Tag done by CI.'
-                                createTag true
-                                updateTag true
+                    if (config.scm.type == 'git') {
+                        (project/publishers/'hudson.plugins.git.GitPublisher') << {
+                            configVersion 2
+                            pushMerge true
+                            pushOnlyIfSuccess true
+                            tagsToPush {
+                                'hudson.plugins.git.GitPublisher_-TagToPush' {
+                                    targetRepoName "RepoName"
+                                    tagName '${env[\'RELEASE_VERSION\']}'
+                                    tagMessage 'Release Tag done by CI.'
+                                    createTag true
+                                    updateTag true
+                                }
                             }
                         }
+                        
                     }
                     // ########################################################
                     // SVN Publisher (publish tag)
                     // ########################################################
-                    (project/publishers/'hudson.plugins.svn__tag.SvnTagPublisher') << {
-                        tagBaseURL config.scm.svn.tagBase + '/${env[\'RELEASE_VERSION\']}'
-                        tagComment 'Release Tag done by CI.'
-                        tagDeleteComment 'Tag deleted by CI.'
+                    if (config.scm.type == 'svn') {
+                        (project/publishers/'hudson.plugins.svn__tag.SvnTagPublisher') << {
+                            tagBaseURL config.scm.tagBase + '/${env[\'RELEASE_VERSION\']}'
+                            tagComment 'Release Tag done by CI.'
+                            tagDeleteComment 'Tag deleted by CI.'
+                        }
+                        
                     }
 
                     // ########################################################
@@ -520,14 +535,16 @@ jenkins {
                 }
 
                 scm {
-                    git( "${config.scm.git.url}", '${GIT_COMMIT}') { git ->
-                        (git / 'userRemoteConfigs' / 'hudson.plugins.git.UserRemoteConfig' / 'credentialsId') << config.jenkins.scm.credentialsId
-                        (git / 'userRemoteConfigs' / 'hudson.plugins.git.UserRemoteConfig' / 'name') << 'RepoName'
+                    if (config.scm.type == 'git') {
+                        git( "${config.scm.url}", '${GIT_COMMIT}') { git ->
+                            (git / 'userRemoteConfigs' / 'hudson.plugins.git.UserRemoteConfig' / 'credentialsId') << config.jenkins.scm.credentialsId
+                            (git / 'userRemoteConfigs' / 'hudson.plugins.git.UserRemoteConfig' / 'name') << 'RepoName'
+                        }
+                    } else if (config.scm.type == 'svn')  {
+                        svn("${config.scm.url}" + '@${SVN_REVISION}' ) { svn ->
+                            (svn / 'locations' / 'hudson.scm.SubversionSCM_-ModuleLocation' / 'credentialsId') << config.jenkins.scm.credentialsId
+                        }
                     }
-                    /*
-                    svn("${config.scm.svn.url}" + '@${SVN_REVISION}' ) { svn ->
-                        (svn / 'locations' / 'hudson.scm.SubversionSCM_-ModuleLocation' / 'credentialsId') << config.jenkins.scm.credentialsId
-                    }*/
                 }
 
                 steps {
@@ -549,14 +566,18 @@ jenkins {
                 description 'Installs the project on the prod server <a href="${config.environments.test.server.url}">${config.environments.test.server.url}</a>'
 
                 scm {
-                    git( "${config.scm.git.url}") { git ->
-                        (git / 'userRemoteConfigs' / 'hudson.plugins.git.UserRemoteConfig' / 'refspec') << 'refs/tags/${env[\'RELEASE_VERSION\']}'
-                        (git / 'userRemoteConfigs' / 'hudson.plugins.git.UserRemoteConfig' / 'credentialsId') << config.jenkins.scm.credentialsId
+                    if (config.scm.type == 'git') {
+                        git( "${config.scm.url}") { git ->
+                            (git / 'userRemoteConfigs' / 'hudson.plugins.git.UserRemoteConfig' / 'refspec') << 'refs/tags/${env[\'RELEASE_VERSION\']}'
+                            (git / 'userRemoteConfigs' / 'hudson.plugins.git.UserRemoteConfig' / 'credentialsId') << config.jenkins.scm.credentialsId
+                        }
+                    } else if (config.scm.type == 'svn') {
+                        svn("${config.scm.url}" + '@${SVN_REVISION}' ) { svn ->
+                            (svn / 'locations' / 'hudson.scm.SubversionSCM_-ModuleLocation' / 'credentialsId') << config.jenkins.scm.credentialsId
+                        }
+
                     }
-                    /*
-                    svn("${config.scm.svn.url}" + '@${SVN_REVISION}' ) { svn ->
-                        (svn / 'locations' / 'hudson.scm.SubversionSCM_-ModuleLocation' / 'credentialsId') << config.jenkins.scm.credentialsId
-                    }*/
+                    
                 }
 
                 configure { project -> 
