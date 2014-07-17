@@ -64,6 +64,7 @@ scm {
 
 	svn {
 		url = ""
+		tagBase = ""
 	}
 }
 

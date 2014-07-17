@@ -65,6 +65,21 @@ jenkins {
                     // mask passwords
                     (project / buildWrappers).appendNode("com.michelin.cio.hudson.plugins.maskpasswords.MaskPasswordsBuildWrapper")
 
+                    // build name setter
+                    (project / buildWrappers).appendNode("org.jenkinsci.plugins.buildnamesetter.BuildNameSetter", [ 'plugin' : 'build-name-setter@1.3']) << {
+                        template "${rootProject.name}" + '#${ENV,var="SOURCE_BUILD_NUMBER"}'
+                    }
+                }
+
+                
+                scm {
+                    git( "${config.scm.git.url}" ) { git ->
+                        (git / 'userRemoteConfigs' / 'hudson.plugins.git.UserRemoteConfig' / 'credentialsId') << config.jenkins.scm.credentialsId
+                    }
+
+                    /* svn("${config.scm.svn.url}") { svn ->
+                        (svn / 'locations' / 'hudson.scm.SubversionSCM_-ModuleLocation' / 'credentialsId') << config.jenkins.scm.credentialsId
+                    }*/
                 }
 
             }
@@ -79,10 +94,6 @@ jenkins {
                     (project / 'properties').appendNode("se.diabol.jenkins.pipeline.PipelineProperty", [ 'plugin' : 'delivery-pipeline-plugin@0.8.2']) << {
                         stageName 'COMMIT'
                     }
-                    // build name setter
-                    (project / buildWrappers).appendNode("org.jenkinsci.plugins.buildnamesetter.BuildNameSetter", [ 'plugin' : 'build-name-setter@1.3']) << {
-                        template "${rootProject.name}" + '#${ENV,var="SOURCE_BUILD_NUMBER"}'
-                    }
                 }
 
                 scm {
@@ -91,6 +102,7 @@ jenkins {
             }
 
         }
+
         // Acceptance Stage
         acceptance {
             dsl {
@@ -102,57 +114,31 @@ jenkins {
                     (project / 'properties').appendNode("se.diabol.jenkins.pipeline.PipelineProperty", [ 'plugin' : 'delivery-pipeline-plugin@0.8.2']) << {
                         stageName 'ACCEPTANCE'
                     }
-                    // build name setter
-                    (project / buildWrappers).appendNode("org.jenkinsci.plugins.buildnamesetter.BuildNameSetter", [ 'plugin' : 'build-name-setter@1.3']) << {
-                        template "${rootProject.name}" + '#${ENV,var="SOURCE_BUILD_NUMBER"}'
+                }
+
+                scm {
+                    git( "${config.scm.git.url}", '${COMMIT}') { git ->
+                        (git / 'userRemoteConfigs' / 'hudson.plugins.git.UserRemoteConfig' / 'credentialsId') << config.jenkins.scm.credentialsId
                     }
+                    /*
+                    svn("${config.scm.svn.url}" + '@${SVN_REVISION}' ) { svn ->
+                        (svn / 'locations' / 'hudson.scm.SubversionSCM_-ModuleLocation' / 'credentialsId') << config.jenkins.scm.credentialsId
+                    }*/
                 }
             }
         }
 
-        // Template for jobs in the 'QA' Phase
-        uat {
-            dsl {
-                using "base"
-
-                configure { project -> 
-
-                    // pipeline
-                    (project / 'properties').appendNode("se.diabol.jenkins.pipeline.PipelineProperty", [ 'plugin' : 'delivery-pipeline-plugin@0.8.2']) << {
-                        stageName 'UAT'
-                    }
-                    // build name setter
-                    (project / buildWrappers).appendNode("org.jenkinsci.plugins.buildnamesetter.BuildNameSetter", [ 'plugin' : 'build-name-setter@1.3']) << {
-                        template "${rootProject.name}" + '#${ENV,var="SOURCE_BUILD_NUMBER"}'
-                    }
-                }
-            }
-        }
-
-        // Template for jobs in the Production phase
-        prod {
-            dsl {
-                using "base"
-
-                configure { project -> 
-
-                    // pipeline
-                    (project / 'properties').appendNode("se.diabol.jenkins.pipeline.PipelineProperty", [ 'plugin' : 'delivery-pipeline-plugin@0.8.2']) << {
-                        stageName 'PROD'
-                    }
-                    // build name setter
-                    (project / buildWrappers).appendNode("org.jenkinsci.plugins.buildnamesetter.BuildNameSetter", [ 'plugin' : 'build-name-setter@1.3']) << {
-                        template "${rootProject.name}" + '#${ENV,var="SOURCE_BUILD_NUMBER"}'
-                    }
-                }
-            }
-        }
     }
 
     // ########################################################################
     // Jobs 
     // ########################################################################
     jobs {
+
+        // ####################################################################
+        // Step 0: Creation Job. Inits the project and scaffolds the data.
+        // ####################################################################
+
 
         // ####################################################################
         // Step 1.1: Initial job, triggers after every checking (commit stage)
@@ -163,13 +149,6 @@ jenkins {
                 using "base"
 
                 description 'Checks for Changes in the SCM, compiles the code and runs the unit tests (not integration tests though). <br/> Goal: Rapid Feedback (<5mins), Run on every checkin, fix broken builds.'
-
-                scm {
-                    git( "${config.scm.git.url}" ) { git ->
-                        (git / 'userRemoteConfigs' / 'hudson.plugins.git.UserRemoteConfig' / 'credentialsId') << config.jenkins.scm.credentialsId
-                    }
-                    // svn( "${config.scm.svn.url}" )
-                }
 
                 triggers {
                     // check for scm updates every 5 minutes
@@ -196,7 +175,7 @@ jenkins {
                 }
                 
                 steps {
-                    gradle ('initProject scaffold clean test', '', true) { node ->
+                    gradle ('clean test', '', true) { node ->
                         node / fromRootBuildScriptDir << true
                     }
 
@@ -226,7 +205,7 @@ jenkins {
                     downstreamParameterized {
                         trigger ("${rootProject.name}-integration_tests", 'SUCCESS', true, ['buildStepFailure': 'FAILURE', 'failure' : 'FAILURE', 'unstable' : 'UNSTABLE']) {
                             currentBuild() // Current Build Parameters
-                            predefinedProps(['SOUCE_BUILD_NUMBER':'${BUILD_NUMBER}', 'SVN_REVISION' : '${SVN_REVISION}'])
+                            predefinedProps(['SOUCE_BUILD_NUMBER':'${BUILD_NUMBER}', 'SVN_REVISION' : '${SVN_REVISION}', 'GIT_COMMIT' : '${GIT_COMMIT}'])
                             setTriggerWithNoParameters false
                         }
                      }
@@ -260,7 +239,7 @@ jenkins {
                     downstreamParameterized {
                         trigger ("${rootProject.name}-code_analysis", 'SUCCESS', true, ['buildStepFailure': 'FAILURE', 'failure' : 'FAILURE', 'unstable' : 'UNSTABLE']) {
                             currentBuild() // Current Build Parameters
-                            predefinedProps(['SOUCE_BUILD_NUMBER':'${BUILD_NUMBER}', 'SVN_REVISION' : '${SVN_REVISION}'])
+                            predefinedProps(['SOUCE_BUILD_NUMBER':'${BUILD_NUMBER}', 'SVN_REVISION' : '${SVN_REVISION}', 'GIT_COMMIT' : '${GIT_COMMIT}'])
                             setTriggerWithNoParameters false
                         }
                     }
@@ -284,7 +263,6 @@ jenkins {
                     gradle ('sonarRunner', '', true) { node -> 
                         node / fromRootBuildScriptDir << true
                     }
-
                 }
 
                 publishers {
@@ -293,7 +271,7 @@ jenkins {
                     downstreamParameterized {
                         trigger ("${rootProject.name}-assemble", 'SUCCESS', true, ['buildStepFailure': 'FAILURE', 'failure' : 'FAILURE', 'unstable' : 'UNSTABLE']) {
                             currentBuild() // Current Build Parameters
-                            predefinedProps(['SOUCE_BUILD_NUMBER':'${SOURCE_BUILD_NUMBER}', 'SVN_REVISION' : '${SVN_REVISION}'])
+                            predefinedProps(['SOUCE_BUILD_NUMBER':'${SOURCE_BUILD_NUMBER}', 'SVN_REVISION' : '${SVN_REVISION}', 'GIT_COMMIT' : '${GIT_COMMIT}'])
                             setTriggerWithNoParameters false
                         }
                     }
@@ -341,7 +319,7 @@ jenkins {
                     downstreamParameterized {
                         trigger ("${rootProject.name}-publish", 'SUCCESS', true, ['buildStepFailure': 'FAILURE', 'failure' : 'FAILURE', 'unstable' : 'UNSTABLE']) {
                             currentBuild() // Current Build Parameters
-                            predefinedProps(['SOUCE_BUILD_NUMBER':'${BUILD_NUMBER}', 'SVN_REVISION' : '${SVN_REVISION}'])
+                            predefinedProps(['SOUCE_BUILD_NUMBER':'${BUILD_NUMBER}', 'SVN_REVISION' : '${SVN_REVISION}', 'GIT_COMMIT' : '${GIT_COMMIT}'])
                             setTriggerWithNoParameters false
                         }
                     }
@@ -374,7 +352,7 @@ jenkins {
                     downstreamParameterized {
                         trigger ("${rootProject.name}-deploy_binaries", 'SUCCESS', true, ['buildStepFailure': 'FAILURE', 'failure' : 'FAILURE', 'unstable' : 'UNSTABLE']) {
                             currentBuild() // Current Build Parameters
-                            predefinedProps(['SOUCE_BUILD_NUMBER':'${BUILD_NUMBER}', 'SVN_REVISION' : '${SVN_REVISION}'])
+                            predefinedProps(['SOUCE_BUILD_NUMBER':'${BUILD_NUMBER}', 'SVN_REVISION' : '${SVN_REVISION}', 'GIT_COMMIT' : '${GIT_COMMIT}'])
                             setTriggerWithNoParameters false
                         }
                     }
@@ -394,10 +372,6 @@ jenkins {
 
                 description 'Installs the binaries on the integration server <a href="${config.environments.integration.server.url}">${config.environments.integration.server.url}</a>'
 
-                scm {
-                    svn("${config.scm.git.url}" + '@${SVN_REVISION}')
-                }
-
                 steps {
                     gradle ('deploy', '-Penv=integration', true) { node -> 
                         node / fromRootBuildScriptDir << true
@@ -411,7 +385,7 @@ jenkins {
                     downstreamParameterized {
                         trigger ("${rootProject.name}-acceptance_tests", 'SUCCESS', true, ['buildStepFailure': 'FAILURE', 'failure' : 'FAILURE', 'unstable' : 'UNSTABLE']) {
                             currentBuild() // Current Build Parameters
-                            predefinedProps(['SOUCE_BUILD_NUMBER':'${BUILD_NUMBER}', 'SVN_REVISION' : '${SVN_REVISION}'])
+                            predefinedProps(['SOUCE_BUILD_NUMBER':'${BUILD_NUMBER}', 'SVN_REVISION' : '${SVN_REVISION}', 'GIT_COMMIT' : '${GIT_COMMIT}'])
                             setTriggerWithNoParameters false
                         }
                     }
@@ -443,7 +417,7 @@ jenkins {
                     downstreamParameterized {
                         trigger ("${rootProject.name}-performance_tests", 'SUCCESS', true, ['buildStepFailure': 'FAILURE', 'failure' : 'FAILURE', 'unstable' : 'UNSTABLE']) {
                             currentBuild() // Current Build Parameters
-                            predefinedProps(['SOUCE_BUILD_NUMBER':'${BUILD_NUMBER}', 'SVN_REVISION' : '${SVN_REVISION}'])
+                            predefinedProps(['SOUCE_BUILD_NUMBER':'${BUILD_NUMBER}', 'SVN_REVISION' : '${SVN_REVISION}', 'GIT_COMMIT' : '${GIT_COMMIT}'])
                             setTriggerWithNoParameters false
                         }
                     }
@@ -463,23 +437,23 @@ jenkins {
 
                 description 'Runs the performance tests (jmeter) on the integration server.'
 
+                configure { project -> 
+                    // ########################################################
+                    // Build other projects (manual step)
+                    // ########################################################
+                    (project/publishers/'au.com.centrumsystems.hudson.plugin.buildpipeline.trigger.BuildPipelineTrigger') << {
+                        configs {
+                            'hudson.plugins.parameterizedtrigger.PredefinedBuildParameters' {
+                                properties 'SOUCE_BUILD_NUMBER=${BUILD_NUMBER}\nSVN_REVISION=${SVN_REVISION}\nGIT_COMMIT=${GIT_COMMIT}'
+                            }
+                        }
+                        downstreamProjectNames "${rootProject.name}-deploy_test"
+                    }
+                }
+
                 steps {
                     // TODO
                 }
-
-                publishers {
-
-                    // Trigger parameterized build on other projects
-                    downstreamParameterized {
-                        trigger ("${rootProject.name}-deploy_test", 'SUCCESS', true, ['buildStepFailure': 'FAILURE', 'failure' : 'FAILURE', 'unstable' : 'UNSTABLE']) {
-                            currentBuild() // Current Build Parameters
-                            predefinedProps(['SOUCE_BUILD_NUMBER':'${BUILD_NUMBER}', 'SVN_REVISION' : '${SVN_REVISION}'])
-                            setTriggerWithNoParameters false
-                        }
-                    }
-
-                }
-
             }
         }
 
@@ -489,34 +463,74 @@ jenkins {
         "${rootProject.name}-deploy_test" {
             dsl {
 
-                using "uat"
+                using "base"
 
                 description 'Installs the project on the test server <a href="${config.environments.test.server.url}">${config.environments.test.server.url}</a>'
 
+                configure { project -> 
+
+                    // pipeline
+                    (project / 'properties').appendNode("se.diabol.jenkins.pipeline.PipelineProperty", [ 'plugin' : 'delivery-pipeline-plugin@0.8.2']) << {
+                        stageName 'UAT'
+                    }
+
+                    // ########################################################
+                    // Git Publisher (publish tag)
+                    // ########################################################
+                    (project/publishers/'hudson.plugins.git.GitPublisher') << {
+                        configVersion 2
+                        pushMerge true
+                        pushOnlyIfSuccess true
+                        tagsToPush {
+                            'hudson.plugins.git.GitPublisher_-TagToPush' {
+                                targetRepoName "RepoName"
+                                tagName '${env[\'RELEASE_VERSION\']}'
+                                tagMessage 'Release Tag done by CI.'
+                                createTag true
+                                updateTag true
+                            }
+                        }
+                    }
+                    // ########################################################
+                    // SVN Publisher (publish tag)
+                    // ########################################################
+                    (project/publishers/'hudson.plugins.svn__tag.SvnTagPublisher') << {
+                        tagBaseURL config.scm.svn.tagBase + '/${env[\'RELEASE_VERSION\']}'
+                        tagComment 'Release Tag done by CI.'
+                        tagDeleteComment 'Tag deleted by CI.'
+                    }
+
+                    // ########################################################
+                    // Build other projects (manual step)
+                    // ########################################################
+                    (project/publishers/'au.com.centrumsystems.hudson.plugin.buildpipeline.trigger.BuildPipelineTrigger') << {
+                        configs {
+                            'hudson.plugins.parameterizedtrigger.PredefinedBuildParameters' {
+                                properties 'SOUCE_BUILD_NUMBER=${SOURCE_BUILD_NUMBER}'
+                            }
+                        }
+                        downstreamProjectNames "${rootProject.name}-deploy_production"
+                    }
+
+
+                }
+
                 scm {
-                    svn("${config.scm.git.url}" + '@${SVN_REVISION}')
+                    git( "${config.scm.git.url}", '${GIT_COMMIT}') { git ->
+                        (git / 'userRemoteConfigs' / 'hudson.plugins.git.UserRemoteConfig' / 'credentialsId') << config.jenkins.scm.credentialsId
+                        (git / 'userRemoteConfigs' / 'hudson.plugins.git.UserRemoteConfig' / 'name') << 'RepoName'
+                    }
+                    /*
+                    svn("${config.scm.svn.url}" + '@${SVN_REVISION}' ) { svn ->
+                        (svn / 'locations' / 'hudson.scm.SubversionSCM_-ModuleLocation' / 'credentialsId') << config.jenkins.scm.credentialsId
+                    }*/
                 }
 
                 steps {
                     gradle ('writeVersionFile cargoDeployRemote', '-Penv=test', true) { node -> 
                         node / fromRootBuildScriptDir << true
                     }
-
                 }
-
-                publishers {
-
-                    // Trigger parameterized build on other projects
-                    downstreamParameterized {
-                        trigger ("${rootProject.name}-deploy_production", 'SUCCESS', true, ['buildStepFailure': 'FAILURE', 'failure' : 'FAILURE', 'unstable' : 'UNSTABLE']) {
-                            currentBuild() // Current Build Parameters
-                            predefinedProps(['SOUCE_BUILD_NUMBER':'${BUILD_NUMBER}', 'SVN_REVISION' : '${SVN_REVISION}'])
-                            setTriggerWithNoParameters false
-                        }
-                    }
-
-                }
-
             }
         }
 
@@ -526,12 +540,27 @@ jenkins {
         "${rootProject.name}-deploy_production" {
             dsl {
 
-                using "prod"
+                using "base"
 
                 description 'Installs the project on the prod server <a href="${config.environments.test.server.url}">${config.environments.test.server.url}</a>'
 
                 scm {
-                    svn("${config.scm.git.url}" + '@${SVN_REVISION}')
+                    git( "${config.scm.git.url}") { git ->
+                        (git / 'userRemoteConfigs' / 'hudson.plugins.git.UserRemoteConfig' / 'refspec') << 'refs/tags/${env[\'RELEASE_VERSION\']}'
+                        (git / 'userRemoteConfigs' / 'hudson.plugins.git.UserRemoteConfig' / 'credentialsId') << config.jenkins.scm.credentialsId
+                    }
+                    /*
+                    svn("${config.scm.svn.url}" + '@${SVN_REVISION}' ) { svn ->
+                        (svn / 'locations' / 'hudson.scm.SubversionSCM_-ModuleLocation' / 'credentialsId') << config.jenkins.scm.credentialsId
+                    }*/
+                }
+
+                configure { project -> 
+
+                    // pipeline
+                    (project / 'properties').appendNode("se.diabol.jenkins.pipeline.PipelineProperty", [ 'plugin' : 'delivery-pipeline-plugin@0.8.2']) << {
+                        stageName 'PROD'
+                    }
                 }
 
                 steps {
