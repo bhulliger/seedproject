@@ -1,7 +1,7 @@
 // ############################################################################
 // Group Definition
 // ############################################################################
-group = 'ch.essentialmustard'
+group = '<your group name goes here>'
 
 // ############################################################################
 // System Environment
@@ -182,10 +182,7 @@ subprojects {
 		description "Scaffolds a basic application based on the provided template structure (in dist/src/main/resources/build.groovy)"
 		ext.templateBasePath = "$rootDir/$config.templates.path" + "/scaffolding/" + project.path.replaceAll(":", "/") + "/"
 	}
-
 }
-
-
 
 // ############################################################################
 // Scaffolding

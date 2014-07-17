@@ -5,7 +5,6 @@ templates {
 	scm = "https://github.com/bhulliger/seedproject_templates.git"
 	treeish = '56f88789491ae84755171d786f4c0c617be78d3d'
 	path = "_templates"
-
 }	
 
 // ############################################################################
@@ -15,15 +14,18 @@ os {
 	type = "unix" // unix / win
 }
 
-server {	
+// enter 'android' for android platforms. this results in jenkins jobs with android flavors
+platform = ''
+
+server {
 	context = "web"	// TODO change to real context
 	ip = ""
 }
 
 jenkins {
 	url = "http://localhost:8080" // TODO
-	username = "jenkins" // TODO
-	password = "n0mor3secr3ts" // TODO
+	username = "" // (optional). username can be provided by -DjenkinsUser=<username> for jenkins jobs
+	password = "" // (optional). password can be provided by -DjenkinsPassword=<password> for jenkins jobs
 
 	authorization {
 		permission = "jenkins" // TODO
@@ -59,8 +61,8 @@ sonar {
 
 scm {
 	type = 'git' // 'git' or 'svn' supported
-	url = 'https://github.com/bhulliger/seedproject.git'
-	tagBase = '' // only required for svn. usually something like http://svn.wherever.com/tags
+	url = '<yourProjectRepository>'
+	tagBase = '<yourProjectRepository>/tags' // only required for svn. usually something like http://svn.wherever.com/tags
 }
 
 // ############################################################################
@@ -107,8 +109,24 @@ environments {
 	// Integration
 	// ########################################################################
 	integration {
-		env = "int"
-		// TODO
+		env = "integration"
+		server {
+			url = "http://localhost:8080/" + server.context
+			dierctory = "/path/to/jboss/home" // TODO
+		}
+		os {
+			type = "win"
+		}
+		db {
+			driver = "org.hsqldb.jdbcDriver"
+			type = "hsqldb"
+			url = "jdbc:hsqldb:file:c:/tmp/seedproject/hsqldb/db;shutdown=true" // TODO
+			user = "sa"
+			password = ""
+			jndiName = "java:/seedprojectDB" // TODO
+			jndiNameAdmin = "java:/seedprojectDBAdmin" // TODO
+			poolName = "seedprojectPool" // TODO
+		}
 	}
 
 	// ########################################################################

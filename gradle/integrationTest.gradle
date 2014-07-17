@@ -11,16 +11,14 @@ sourceSets {
 }
 
 // ############################################################################
-// Integration Test
+// Task definition for Integration Tests
 // ############################################################################
 task integrationTest(type: Test) {
 	description 'Run the integration tests'
-	filter {
-		// only run tests that match the pattern *IT.java*
-		includeTestsMatching "*IT.java"
-	}
-
 	group = 'verification'
+
+	testClassesDir = sourceSets.integrationTest.output.classesDir
+	classpath = sourceSets.integrationTest.runtimeClasspath
 
 	reports {
 		junitXml {
@@ -29,17 +27,15 @@ task integrationTest(type: Test) {
 	}
 }
 
-apply from: "$rootDir/gradle/databaseSetup.gradle"
+// ############################################################################
+// Database integration tests
+// ############################################################################
+// apply from: "$rootDir/gradle/databaseSetup.gradle"
 
-integrationTest.dependsOn startAndPrepareDatabase
+// integrationTest.dependsOn startAndPrepareDatabase
+// stopDatabase.dependsOn integrationTest
 
-stopDatabase.dependsOn integrationTest
-task databaseIntegrationTest(dependsOn: stopDatabase)
+// task databaseIntegrationTest(dependsOn: stopDatabase)
 
-check.dependsOn databaseIntegrationTest
-
-sonarRunner {
-	sonarProperties {
-		properties['sonar.tests'] += sourceSets.integrationTest.allSource.srcDirs
-	}
-}
+// integrate task into build lifecycle
+// check.dependsOn databaseIntegrationTests

@@ -1,11 +1,34 @@
 apply plugin: "com.terrafolio.jenkins"
+
+// ############################################################################
+// check if username and password are provided
+// ############################################################################
+
+task checkCredentials << {
+    println "checking for jenkins credentials"
+
+    def user = System.properties['jenkinsUser'] ?: config.jenkins.username
+    def password = System.properties['jenkinsPassword'] ?: config.jenkins.password
+
+    if (!user?.trim() || !password?.trim()) {
+        def errormessage = "Please provide your jenkins username and pasword as arguments: -DjenkinsUser=<username> -DjenkinsPassword=<password>"
+
+        throw new InvalidUserDataException(errormessage);
+    } 
+
+    println "Updating jenkins with user: " + user
+}
+
+updateJenkinsItems.dependsOn checkCredentials
+deleteJenkinsItems.dependsOn checkCredentials
+
 jenkins {
     servers {
         testing {
             url config.jenkins.url
             secure true
-            username config.jenkins.username
-            password config.jenkins.password
+            username System.properties['jenkinsUser'] ?: config.jenkins.username
+            password System.properties['jenkinsPassword'] ?: config.jenkins.password
         }
     }
 
@@ -320,10 +343,12 @@ jenkins {
                 description 'Assembles the distribution without environmental configuration. Includes the Build information. Choose versioning strategy.'
 
                 steps {
-                    gradle ('assemble', '-Penv=${env}', true) { node -> 
-                        node / fromRootBuildScriptDir << true
-                    }
 
+                    def task = config.platform == 'android' ? 'assemble${env}' : 'assemble'
+
+                    gradle (task, '-Penv=${env}', true) { node -> 
+                        node / fromRootBuildScriptDir << true
+                    }    
                 }
 
                 publishers {
