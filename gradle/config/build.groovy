@@ -58,14 +58,9 @@ sonar {
 }
 
 scm {
-	git {
-		url = "https://github.com/bhulliger/seedproject.git"
-	}
-
-	svn {
-		url = ""
-		tagBase = ""
-	}
+	type = 'git' // 'git' or 'svn' supported
+	url = 'https://github.com/bhulliger/seedproject.git'
+	tagBase = '' // only required for svn. usually something like http://svn.wherever.com/tags
 }
 
 // ############################################################################
