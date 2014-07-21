@@ -211,7 +211,7 @@ jenkins {
                 }
                 
                 steps {
-                    gradle ('scaffold clean test', '', true) { node ->
+                    gradle ('clean test', '', true) { node ->
                         node / fromRootBuildScriptDir << true
                     }
 
@@ -318,9 +318,9 @@ jenkins {
         }
 
         // ####################################################################
-        // Step 1.4: Assemble
+        // Step 1.4: Assemble & Publish
         // ####################################################################
-        "${rootProject.name}-assemble" {
+        "${rootProject.name}-publish" {
             dsl {
                 using "commit"
 
@@ -340,48 +340,15 @@ jenkins {
                 }
 
 
-                description 'Assembles the distribution without environmental configuration. Includes the Build information. Choose versioning strategy.'
+                description 'Assembles the distribution environmental configuration adn publishes it to the remote repository. Includes the Build information. Choose versioning strategy.'
 
                 steps {
 
-                    def task = config.platform == 'android' ? 'assemble${env}' : 'assemble'
+                    def task = config.platform == 'android' ? 'assemble${env} publish' : 'assemble publish'
 
                     gradle (task, '-Penv=${env}', true) { node -> 
                         node / fromRootBuildScriptDir << true
                     }    
-                }
-
-                publishers {
-
-                    // Trigger parameterized build on other projects
-                    downstreamParameterized {
-                        trigger ("${rootProject.name}-publish", 'SUCCESS', true, ['buildStepFailure': 'FAILURE', 'failure' : 'FAILURE', 'unstable' : 'UNSTABLE']) {
-                            currentBuild() // Current Build Parameters
-                            predefinedProps(['SOUCE_BUILD_NUMBER':'${BUILD_NUMBER}', 'SVN_REVISION' : '${SVN_REVISION}', 'GIT_COMMIT' : '${GIT_COMMIT}'])
-                            setTriggerWithNoParameters false
-                        }
-                    }
-
-                }
-
-            }
-        }
-
-        // ####################################################################
-        // Step 1.5: Publish
-        // ####################################################################
-        "${rootProject.name}-publish" {
-            dsl {
-
-                using "commit"
-
-                description 'Version artifact(s). Use binary repository, publish once, then reuse.'
-
-                steps {
-                    gradle ('publish', '-Penv=${env}', true) { node -> 
-                        node / fromRootBuildScriptDir << true
-                    }
-
                 }
 
                 publishers {
