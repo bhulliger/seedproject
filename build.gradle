@@ -1,7 +1,7 @@
 // ############################################################################
 // Group Definition
 // ############################################################################
-group = 'ch.essentialmustard'
+group = '<your group name goes here>'
 
 // ############################################################################
 // System Environment
@@ -49,16 +49,12 @@ apply from: "$rootDir/gradle/codeanalysis.gradle"
 // ############################################################################
 buildscript {
 	repositories {
-		maven {
-			url "http://artifactory.ims.ch:8081/artifactory/public/"
-		}
 		jcenter()
 		mavenCentral()
 	}
 
 	dependencies {
 		classpath "com.terrafolio:gradle-jenkins-plugin:1.2.1"
-		// classpath 'org.ajoberstar:gradle-git:0.9.0'
 		classpath 'com.palominolabs.gradle.task:gradle-git-clone-task:0.0.2'
 	}
 }
@@ -110,8 +106,10 @@ subprojects {
 	task initProject(type: Copy) {
 		description "initializes the project structure with all required packages and build files."
 
-		from "$rootDir/$config.templates.path/skeleton/" + project.path.replaceAll(":", "/")
-		into "$rootDir" + project.path.replaceAll(":", "/")
+		if (project.getChildProjects().isEmpty()) {
+			from "$rootDir/$config.templates.path/skeleton/" + project.path.replaceAll(":", "/")
+			into "$rootDir" + project.path.replaceAll(":", "/")
+		}
 	}
 
 	// ########################################################################
@@ -161,6 +159,7 @@ task deleteAll() << {
 	delete 'build'
 	delete '.gradle'
 	delete 'dist'
+	delete config.templates.path
 
 	rootProject.getChildProjects().each {
 		delete it.key

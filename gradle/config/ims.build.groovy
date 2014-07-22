@@ -3,7 +3,7 @@
 // ############################################################################
 templates {
 	scm = "https://github.com/bhulliger/seedproject_templates.git"
-	treeish = '3fafd437dad6dfb0e337489cfc4f10456630e8b6'
+	treeish = '56f88789491ae84755171d786f4c0c617be78d3d'
 	path = "_templates"
 }	
 
@@ -24,22 +24,22 @@ server {
 
 jenkins {
 
-	url = "<jenkins url>" // url where jenkins can be reached
+	url = "http://localhost:8080" // url where jenkins can be reached
 
-	username = "" // (optional). username can be provided by -DjenkinsUser=<username> for jenkins jobs
-	password = "" // (optional). password can be provided by -DjenkinsPassword=<password> for jenkins jobs
+	username = "bhu" // (optional). username can be provided by -DjenkinsUser=<username> for jenkins jobs
+	password = "Ascotel005*" // (optional). password can be provided by -DjenkinsPassword=<password> for jenkins jobs
 
 	// project-based security: User or group that has access to the project. 
 	authorization {
-		permission = "<jenkins permission>" // Optional
+		permission = "bhu" // Optional
 	}
 
 	// credentials ID for scm access. the credentials ID must be accessed from the jenkins configuration file.
 	scm {
-		credentialsId = '<credentialId from jenkins configuration file>' // TODO
+		credentialsId = '' // TODO
 	}
 
-	// Environment definitionfor 'Build multi-configuration project'-Job (distribution job). Only relevant for non-android projects.
+	// Environment definition (or android flavors) for 'Build multi-configuration project'-Job (distribution job)
 	axes = [ 'integration', 'test', 'prod' ]
 
 	// comma-separated list of email addresses to be notified on failed builds
@@ -48,7 +48,7 @@ jenkins {
 
 sonar {
 	host {
-		url = "<sonar url>" // URL where sonar can be reached
+		url = "http://localhost:9000" // URL where sonar can be reached
 	}
 	jdbc {
 		// JDBC Configuration for the sonar server. These configurations can be found in your sonar.properties 
@@ -69,31 +69,9 @@ sonar {
 
 scm {
 	type = 'git' // 'git' or 'svn' supported
-	url = '<yourProjectRepository>'
+	url = 'https://github.com/bhulliger/seedproject.git'
 	tagBase = '<yourProjectRepository>/tags' // only required for svn. usually something like http://svn.wherever.com/tags
 }
-
-// ############################################################################
-// (Optional) Android Platform
-// This section is only required in case you have an android app (app:android in your settings.gradle file.)
-// ############################################################################
-android {
-
-	// Signing
-	signing {
-		// Consult the android userguide for further documentation: http://tools.android.com/tech-docs/new-build-system/user-guide#TOC-Signing-Configurations
-		keyAlias = "<here goes your key alias>" // Key Alias Name
-		storeFile = "<here goes the path to your storefile (.jks)" // The android store file
-		storePassword = "" // Optional. The store password can be passed as command-line argument -Dkeypass=<password>. Command-line parameters are prioritized to this config (override this config).
-	}
-
-
-	products {
-		environments = ['test', 'staging', 'prod']
-		flavors = [ '' ] // a list of all your flavors (like customers)
-	}
-}
-
 
 // ############################################################################
 // Artifacts

@@ -137,3 +137,24 @@ android {
         }
 	}
 }
+
+// ############################################################################
+// Project Initialization
+// ############################################################################
+task initProject(type: Copy) {
+
+	println "********************* initializing android project. **************************"
+
+	if (project.getChildProjects().isEmpty()) {
+		android.sourceSets.main.java.srcDirs*.each {
+			new File(it.toString() + "/" + rootProject.group.replaceAll("\\.", "/") + "/" + rootProject.name + "/" + project.name).mkdirs()
+		}
+		android.sourceSets.main.res.srcDirs*.each {
+			it.mkdirs()
+		}
+
+		android.sourceSets.main.assets.srcDirs*.each {
+			it.mkdirs()
+		}
+	}
+}

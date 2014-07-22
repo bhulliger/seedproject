@@ -1,4 +1,5 @@
 apply plugin: "java"
+
 // ############################################################################
 // Source Code Configuration
 // ############################################################################
@@ -18,12 +19,7 @@ sourceSets {
 // ############################################################################
 // Dependencies for all projects
 // ############################################################################
-dependencies {
-	testCompile		group: 'junit', 				name: 'junit',			version: '4.+'
-	testCompile 	group: 'org.mockito', 			name: 'mockito-all',	version: '1.9.+'
-	
-	compile 		group: 'org.projectlombok', 	name: 'lombok', 		version: '1.14.+'
-}
+apply from: "$rootDir/gradle/java/dependencies.gradle"
 
 // ############################################################################
 // Cargo
@@ -61,11 +57,7 @@ jacocoTestReport {
 // ############################################################################
 // Project Initialization
 // ############################################################################
-task initProject(type: Copy) << {
-	description "initializes the project structure with all required packages and build files."
-
-	from "$rootDir/$config.templates.path/skeleton/" + project.path.replaceAll(":", "/")
-	into "$rootDir" + project.path.replaceAll(":", "/")
+initProject << {
 
 	if (project.getChildProjects().isEmpty()) {
 		sourceSets*.java.srcDirs*.each {
