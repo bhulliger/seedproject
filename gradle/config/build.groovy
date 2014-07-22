@@ -19,6 +19,7 @@ platform = ''
 
 server {
 	context = "web"	// TODO change to real context
+	port = 8080 // preferred port for jboss
 	ip = ""
 }
 
@@ -116,13 +117,7 @@ environments {
 	// ########################################################################
 	dev {
 		env = "dev"
-		server {
-			url = "http://localhost:8080/" + server.context
-			dierctory = "/path/to/jboss/home" // TODO
-		}
-		os {
-			type = "win"
-		}
+		
 		db {
 			driver = "org.hsqldb.jdbcDriver"
 			type = "hsqldb"
@@ -140,23 +135,7 @@ environments {
 	// ########################################################################
 	integration {
 		env = "integration"
-		server {
-			url = "http://localhost:8080/" + server.context
-			dierctory = "/path/to/jboss/home" // TODO
-		}
-		os {
-			type = "win"
-		}
-		db {
-			driver = "org.hsqldb.jdbcDriver"
-			type = "hsqldb"
-			url = "jdbc:hsqldb:file:c:/tmp/seedproject/hsqldb/db;shutdown=true" // TODO
-			user = "sa"
-			password = ""
-			jndiName = "java:/seedprojectDB" // TODO
-			jndiNameAdmin = "java:/seedprojectDBAdmin" // TODO
-			poolName = "seedprojectPool" // TODO
-		}
+		// TODO
 	}
 
 	// ########################################################################
