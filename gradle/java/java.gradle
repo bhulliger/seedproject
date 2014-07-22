@@ -1,0 +1,80 @@
+apply plugin: "java"
+// ############################################################################
+// Source Code Configuration
+// ############################################################################
+sourceCompatibility = 1.8
+
+// ############################################################################
+// Source Sets
+// ############################################################################
+sourceSets {
+	generated {
+        java {
+            srcDir 'src/generated/java'
+        }
+    }
+}
+
+// ############################################################################
+// Dependencies for all projects
+// ############################################################################
+dependencies {
+	testCompile		group: 'junit', 				name: 'junit',			version: '4.+'
+	testCompile 	group: 'org.mockito', 			name: 'mockito-all',	version: '1.9.+'
+	
+	compile 		group: 'org.projectlombok', 	name: 'lombok', 		version: '1.14.+'
+}
+
+// ############################################################################
+// Cargo
+// ############################################################################
+apply from: "$rootDir/gradle/cargo.gradle"
+
+// ############################################################################
+// Unit & Integration Tests & & Functional Tests & JMeter Tests
+// ############################################################################
+apply from: "$rootDir/gradle/integrationTest.gradle"
+
+// apply from: "$rootDir/gradle/functionalTest.gradle"
+
+apply from: "$rootDir/gradle/loadTest.gradle"
+
+
+// ############################################################################
+// Build & Distribution
+// ############################################################################
+jar {
+	manifest {
+		attributes 'Implementation-Title' : rootProject.name + "-" + project.name, 'Implementation-Version' : version
+	}
+}
+
+// ############################################################################
+// Reporting
+// ############################################################################
+jacocoTestReport {
+	reports {
+		xml.enabled true
+	}
+}
+
+// ############################################################################
+// Project Initialization
+// ############################################################################
+task initProject(type: Copy) << {
+	description "initializes the project structure with all required packages and build files."
+
+	from "$rootDir/$config.templates.path/skeleton/" + project.path.replaceAll(":", "/")
+	into "$rootDir" + project.path.replaceAll(":", "/")
+
+	if (project.getChildProjects().isEmpty()) {
+		sourceSets*.java.srcDirs*.each {
+			new File(it.toString() + "/" + rootProject.group.replaceAll("\\.", "/") + "/" + rootProject.name + "/" + project.name).mkdirs()
+		}
+		sourceSets*.resources.srcDirs*.each {
+			new File(it.toString() + "/" + rootProject.group.replaceAll("\\.", "/") + "/" + rootProject.name + "/" + project.name).mkdirs()
+		}
+	}
+}
+
+

@@ -322,6 +322,9 @@ jenkins {
         // ####################################################################
         "${rootProject.name}-publish" {
             dsl {
+
+                def isAndroid = project.name.contains('android')
+
                 using "commit"
 
                 configure { project -> 
@@ -332,9 +335,23 @@ jenkins {
                         name 'Umgebung'
                         values {
 
-                            config.jenkins.axes.each {
-                                string it
+                            // combine flavors for android
+                            if (isAndroid) {
+
+                                config.android.products.flavors.each { flavor ->
+                                    config.android.products.environments.each { android_env ->
+                                        string "${flavor}_${android_env}"
+                                    }
+                                }
+
+                            // axes for web apps
+                            } else {
+
+                                config.jenkins.axes.each {
+                                    string it
+                                }
                             }
+
                         } 
                     }
                 }
@@ -344,7 +361,7 @@ jenkins {
 
                 steps {
 
-                    def task = config.platform == 'android' ? 'assemble${env} publish' : 'assemble publish'
+                    def task = project.name.contains('android') ? 'assemble${env} publish' : 'assemble publish'
 
                     gradle (task, '-Penv=${env}', true) { node -> 
                         node / fromRootBuildScriptDir << true

@@ -1,7 +1,7 @@
 // ############################################################################
 // Group Definition
 // ############################################################################
-group = '<your group name goes here>'
+group = 'ch.essentialmustard'
 
 // ############################################################################
 // System Environment
@@ -89,7 +89,6 @@ allprojects {
 // Global Subproject definitions
 // ############################################################################
 subprojects {
-	apply plugin: "java"
 	apply plugin: "eclipse"
 	apply plugin: "eclipse-wtp"
 	apply plugin: "jacoco"
@@ -98,81 +97,21 @@ subprojects {
 	group = rootProject.group
 
 	// ########################################################################
-	// Source Code Configuration
-	// ########################################################################
-	sourceCompatibility = 1.8
-
-	// ########################################################################
-	// Dependencies
-	// ########################################################################
-	apply from: "$rootDir/dependencies.gradle"
-
-	// ########################################################################
-	// Source Sets
-	// ########################################################################
-	sourceSets {
-		generated {
-	        java {
-	            srcDir 'src/generated/java'
-	        }
-	    }
-	}
-
-	// ########################################################################
-	// Unit & Integration Tests & & Functional Tests & JMeter Tests
-	// ########################################################################
-	test {
-		exclude "**/*IT.*"
-	}
-
-	apply from: "$rootDir/gradle/integrationTest.gradle"
-
-	// apply from: "$rootDir/gradle/functionalTest.gradle"
-
-	apply from: "$rootDir/gradle/loadTest.gradle"
-
-	// ########################################################################
-	// Build & Distribution
-	// ########################################################################
-	jar {
-		manifest {
-			attributes 'Implementation-Title' : rootProject.name + "-" + project.name, 'Implementation-Version' : version
-		}
-	}
-
-	// ########################################################################
 	// Reporting
 	// ########################################################################
 	jacoco {
 		toolVersion = "0.7.1.201405082137"
-
 		// integrationTestTaskName = "integrationTest"
-	}
-
-	jacocoTestReport {
-		reports {
-			xml.enabled true
-		}
 	}
 
 	// ########################################################################
 	// Project Initialization
 	// ########################################################################
-
 	task initProject(type: Copy) {
 		description "initializes the project structure with all required packages and build files."
 
 		from "$rootDir/$config.templates.path/skeleton/" + project.path.replaceAll(":", "/")
 		into "$rootDir" + project.path.replaceAll(":", "/")
-
-		if (project.getChildProjects().isEmpty()) {
-			sourceSets*.java.srcDirs*.each {
-				new File(it.toString() + "/" + rootProject.group.replaceAll("\\.", "/") + "/" + rootProject.name + "/" + project.name).mkdirs()
-			}
-			sourceSets*.resources.srcDirs*.each {
-				new File(it.toString() + "/" + rootProject.group.replaceAll("\\.", "/") + "/" + rootProject.name + "/" + project.name).mkdirs()
-			}
-		}
 	}
 
 	// ########################################################################
@@ -211,13 +150,7 @@ task scaffold(dependsOn: cloneRepo) {
 			delete "$rootDir/$config.templates.path"
 		}
 	}
-
 }
-
-// ############################################################################
-// Continous Integration
-// ############################################################################
-apply from: "$rootDir/gradle/jenkins.gradle"
 
 // ############################################################################
 // Project Cleanup

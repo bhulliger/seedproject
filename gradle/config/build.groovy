@@ -39,7 +39,7 @@ jenkins {
 		credentialsId = '<credentialId from jenkins configuration file>' // TODO
 	}
 
-	// Environment definition (or android flavors) for 'Build multi-configuration project'-Job (distribution job)
+	// Environment definitionfor 'Build multi-configuration project'-Job (distribution job). Only relevant for non-android projects.
 	axes = [ 'integration', 'test', 'prod' ]
 
 	// comma-separated list of email addresses to be notified on failed builds
@@ -72,6 +72,28 @@ scm {
 	url = '<yourProjectRepository>'
 	tagBase = '<yourProjectRepository>/tags' // only required for svn. usually something like http://svn.wherever.com/tags
 }
+
+// ############################################################################
+// (Optional) Android Platform
+// This section is only required in case you have an android app (app:android in your settings.gradle file.)
+// ############################################################################
+android {
+
+	// Signing
+	signing {
+		// Consult the android userguide for further documentation: http://tools.android.com/tech-docs/new-build-system/user-guide#TOC-Signing-Configurations
+		keyAlias = "<here goes your key alias>" // Key Alias Name
+		storeFile = "<here goes the path to your storefile (.jks)" // The android store file
+		storePassword = "" // Optional. The store password can be passed as command-line argument -Dkeypass=<password>. Command-line parameters are prioritized to this config (override this config).
+	}
+
+
+	products {
+		environments = ['test', 'staging', 'prod']
+		flavors = [ '' ] // a list of all your flavors (like customers)
+	}
+}
+
 
 // ############################################################################
 // Artifacts

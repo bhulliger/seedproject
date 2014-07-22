@@ -9,3 +9,4 @@ app/mobile/war
 bin
 .classpath
 _templates
+.metadata

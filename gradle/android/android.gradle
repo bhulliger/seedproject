@@ -1,0 +1,139 @@
+// ############################################################################
+// Configurations & Buildscript
+// ############################################################################
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.12.2'
+    }
+}
+
+configurations {
+	apt
+}
+
+// ############################################################################
+// Dependencies
+// ############################################################################
+dependencies {
+
+	// Android
+	compile 	group: "com.google.android",	name: "support-v4", 			version: "r7"
+	compile 	group: "com.google.android", 	name: "annotations", 			version: "4.1.1.4"
+
+	// Logging
+	compile 	group: "org.slf4j",				name: "slf4j-android",			version: "1.7.7"
+
+	// Misc
+	compile 	group: "org.roboguice", 		name: "roboguice", 				version: "2.0"
+	compile 	group: "javax.validation", 		name: "validation-api", 		version: "1.1.0.Final"
+
+	// Jackson Parsing
+	compile 	group: "org.codehaus.jackson",	name: "jackson-core-asl", 		version: "1.9.13"
+	compile 	group: "org.codehaus.jackson",	name: "jackson-mapper-asl", 	version: "1.9.13"
+
+	// Spring Android
+	compile 	group: "org.springframework.android", 	name: "spring-android-core", 			version: "1.0.1.RELEASE"
+	compile 	group: "org.springframework.android", 	name: "spring-android-rest-template", 	version: "1.0.1.RELEASE"
+	compile 	group: "org.springframework.android", 	name: "spring-android-rest-template", 	version: "1.0.1.RELEASE:sources"
+
+
+	apt 'ch.ims.component:annotation.processor:2.0.0.4'
+	apt files(System.getenv()['ANDROID_HOME'] + '\\platforms\\android-19\\android.jar')
+}
+
+// ############################################################################
+// Android
+// ############################################################################
+apply plugin: "android"
+
+android {
+	compileSdkVersion  19
+	buildToolsVersion  "20.0.0"
+
+	// Default Configuration ##################################################
+	defautlConfig {
+		minSdkVersion 		17
+		targetSdkVersion	19
+	}
+
+	// Compiler Options #######################################################
+	compileOptions {
+		sourceCompatibility = "1.8"
+		targetCompatibility = "1.8"
+	}
+
+	// ########################################################################
+	// Source Sets
+	// ########################################################################
+	sourceSets {
+		main {
+			manifest.srcFile 'AndroidManifest.xml'
+			res.srcDirs = ['res']
+			assets.srcDir = ['assets']
+
+			java {
+				srcDirs = [ 'src/main/java', 'src/generated/java' ]
+			}
+		}
+	}
+
+	// ########################################################################
+	// Verification
+	// ########################################################################
+	lintOptions {
+		abortOnError false
+	}
+
+	// ########################################################################
+	// Assembling
+	// ########################################################################
+	packagingOptions {
+		exclude 'META-INF/license.txt'
+		exclude 'META-INF/notice.txt'
+		exclude 'META-INF/ASL2.0'
+		exclude 'META-INF/LICENSE'
+		exclude 'META-INF/NOTICE'
+	}
+
+	aaptOptions {
+        ignoreAssetsPattern "!.svn:!.git:!.ds_store:!*.scc:.*:<dir>_*:!CVS:!thumbs.db:!picasa.ini:!*~"
+    }
+
+	signingConfigs {
+		release {
+			storeFile file("${config.android.signing.storeFile}")
+			storePassword System.properties['keypass'] ?: config.android.signing.storePassword
+			keyAlias config.android.signing.keyAlias
+		}
+	}
+
+	// Each buildType generates a new APK
+	buildTypes {
+		release {
+			runProguard true
+			proguardFile getDefaultProguardFile('proguard-android.txt')
+			// do only sign the flavors for delivery
+			signingConfig signingConfigs.release
+		}
+	}
+
+	// ########################################################################
+	// Product Flavors (Android) 
+	// the output of the project becomes all possible combinations of Build
+	// Types and Product Flavors. Each [Build Type, Product Flavor] Combination
+	// is called a "Build Variant"
+	// ########################################################################
+	productFlavors {
+		config.android.products.flavors.each { flavor ->
+            config.android.products.environments.each { android_env ->
+                "${flavor}_${android_env}" {
+                	applicationId group + "." + project.name + "_${flavor}_${android_env}"
+                }
+            }
+        }
+	}
+}
