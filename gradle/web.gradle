@@ -1,0 +1,34 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+// ############################################################################
+// Packaging
+// ############################################################################
+task createBuildInfoFile << {
+	description 'writes a build-info.properties file with version and timestamp'
+	def buildInfoFile = new File("$buildDir/build-info.properties")
+	Properties properties = new Properties()
+	properties.setProperty('version', project.version.toString())
+	properties.setProperty('timestamp', project.buildTimestamp)
+	properties.store(buildInfoFile.newWriter(), null)
+}
+
+war {
+	dependsOn createBuildInfoFile
+
+	war.rootSpec.exclude "**/web/client/**"
+	war.rootSpec.exclude "org/fusesorce/**"
+
+	from(buildDir) {
+		include 'build-info.properties'
+		into('WEB-INF/classes')
+	}
+}
+
+war.doLast {
+	delete fileTree('./war')
+	ant.unzip(src: war.archivePath, dest: './war')
+}
+
+processResources {
+	filter(ReplaceTokens, tokens: [ 'version': project.version.toString(), 'buildTime': buildTimestamp ] )
+	exclude '*.mdsd'
+}

@@ -1,7 +1,7 @@
 // ############################################################################
 // Group Definition
 // ############################################################################
-group = '<your group name goes here>'
+group = 'test'
 
 // ############################################################################
 // System Environment
@@ -49,6 +49,14 @@ apply from: "$rootDir/gradle/codeanalysis.gradle"
 // ############################################################################
 buildscript {
 	repositories {
+		maven {
+			// For GWT Gradle Plugin
+            url 'https://github.com/steffenschaefer/gwt-gradle-plugin/raw/maven-repo/'
+        }
+        maven {
+        	// Google Snapshot respository. Remove once gwt 2.7.+ is stable
+        	url "https://oss.sonatype.org/content/repositories/google-snapshots/"
+        }
 		jcenter()
 		mavenCentral()
 	}
@@ -56,6 +64,9 @@ buildscript {
 	dependencies {
 		classpath "com.terrafolio:gradle-jenkins-plugin:1.2.1"
 		classpath 'com.palominolabs.gradle.task:gradle-git-clone-task:0.0.2'
+		classpath 'com.googlecode.flyway:flyway-gradle-plugin:2.2.1'
+		classpath 'com.android.tools.build:gradle:0.12.2'
+		classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.4'
 	}
 }
 
@@ -101,6 +112,16 @@ subprojects {
 	}
 
 	// ########################################################################
+	// Tests
+	// ########################################################################
+	task integrationTest(type: Test) {
+		description = "Run the integration tests. (long running tests and tests with external resources)"
+		group = "verification"
+
+		// extend this test for your own projects if necessary
+	}
+
+	// ########################################################################
 	// Project Initialization
 	// ########################################################################
 	task initProject(type: Copy) {
@@ -118,6 +139,85 @@ subprojects {
 	task scaffold(dependsOn: initProject) {
 		description "Scaffolds a basic application based on the provided template structure (in dist/src/main/resources/build.groovy)"
 		ext.templateBasePath = "$rootDir/$config.templates.path" + "/scaffolding/" + project.path.replaceAll(":", "/") + "/"
+	}
+}
+
+// ############################################################################
+// Deployment for WAR Projects
+// ############################################################################
+def webProjects() {
+	subprojects.findAll { subproject -> subproject.plugins.hasPlugin('war') }
+}
+
+gradle.projectsEvaluated {
+	configure(webProjects()) {
+		apply from: "$rootDir/gradle/cargo.gradle"
+		apply from: "$rootDir/gradle/web.gradle"
+	}
+}
+
+// ############################################################################
+// Configuration of Java Projects
+// ############################################################################
+def javaProjects() {
+	subprojects.findAll { subproject -> subproject.plugins.hasPlugin('java') }
+}
+
+gradle.projectsEvaluated {
+	configure(javaProjects()) {
+		apply from: "$rootDir/gradle/java/java.gradle"
+	}
+}
+
+// ############################################################################
+// Configuration of Android Projects
+// ############################################################################
+def androidProjects() {
+	subprojects.findAll { subproject -> subproject.plugins.hasPlugin('android') }
+}
+
+gradle.projectsEvaluated {
+	configure(androidProjects()) {
+		apply from: "$rootDir/gradle/android/android.gradle"
+	}
+}
+
+// ############################################################################
+// Configuration of GWT Projects
+// ############################################################################
+def gwtProjects() {
+	subprojects.findAll { subproject -> subproject.plugins.hasPlugin('gwt') }
+}
+
+gradle.projectsEvaluated {
+	configure(gwtProjects()) {
+		apply from: "$rootDir/gradle/java/gwt.gradle"
+	}
+}
+
+// ############################################################################
+// Continuous Integration Jobs for Projects
+// ############################################################################
+def ciProjects() {
+	subprojects.findAll { subproject -> subproject.plugins.hasPlugin('com.terrafolio.jenkins') }
+}
+
+gradle.projectsEvaluated {
+	configure(ciProjects()) {
+		apply from: "$rootDir/gradle/jenkins.gradle"
+	}
+}
+
+// ############################################################################
+// Projects that use a database
+// ############################################################################
+def dbProjects() {
+	subprojects.findAll { subproject -> subproject.plugins.hasPlugin('com.googlecode.flyway.gradle.FlywayPlugin') }
+}
+
+gradle.projectsEvaluated {
+	configure(dbProjects()) {
+		apply from: "$rootDir/gradle/flyway.gradle"
 	}
 }
 

@@ -3,7 +3,7 @@
 // ############################################################################
 templates {
 	scm = "https://github.com/bhulliger/seedproject_templates.git"
-	treeish = '3fafd437dad6dfb0e337489cfc4f10456630e8b6'
+	treeish = '99209727a5769f02c3e5900dac0205c1d5f1152f'
 	path = "_templates"
 }	
 
@@ -14,18 +14,18 @@ os {
 	type = "unix" // unix / win
 }
 
-// enter 'android' for android platforms. this results in jenkins jobs with android flavors
-platform = ''
+container {
+	containerId = "tomcat8x" // containerId (http://cargo.codehaus.org/Home) to use for deployment. Default is tomcat8x
+	installUrl = "" // Url where to download the container from. Default the download Url for Tomcat 8
 
-server {
-	context = "web"	// TODO change to real context
-	port = 8080 // preferred port for jboss
-	ip = ""
+	context = "" // (Optional). The context where to run the application in the app server. if not provided, then the context is composed as <rootProjectName>-<projectName>
+	port = 8005 // (Optional). Port where you want to run the applicationserver on
+
 }
 
 jenkins {
 
-	url = "<jenkins url>" // url where jenkins can be reached
+	url = "http://localhost:8080" // url where jenkins can be reached
 
 	username = "" // (optional). username can be provided by -DjenkinsUser=<username> for jenkins jobs
 	password = "" // (optional). password can be provided by -DjenkinsPassword=<password> for jenkins jobs
@@ -135,6 +135,14 @@ environments {
 	// ########################################################################
 	integration {
 		env = "integration"
+
+		container {
+			remote {
+				hostname = "<deployment host>" // TODO The hostname of the remote container
+				username = "<deployment user>" // TODO The username for deployment
+				password = "<deployment password>" // TODO The password for remote deployment
+			}
+		}
 		// TODO
 	}
 

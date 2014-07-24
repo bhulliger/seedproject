@@ -21,7 +21,8 @@ dependencies {
 	cargo 		group: 'org.codehaus.cargo', 		name: 'cargo-core-uberjar', 			version: '1.4.8'
 	cargo 		group: 'org.codehaus.cargo', 		name: 'cargo-ant', 						version: '1.4.8'
 	cargo 		group: 'org.jboss.as',				name: 'jboss-as-controller-client', 	version: '7.2.0.Final'
-
+	cargo 		group: 'org.wildfly', 				name: 'wildfly-controller-client', 		version: '8.0.0.Final'
+	cargo 		group: 'org.codehaus.cargo', 		name: 'cargo-ant', 						version: '1.4.5'    
 }
 
 
@@ -29,27 +30,29 @@ dependencies {
 // Cargo Configuration
 // ############################################################################
 cargo {
-	containerId = 'jboss71x'
-
+	containerId = config.container.containerId?.trim() ?: 'tomcat8x'
+	port = config.container.port ?: 8080
+	
 	deployable {
-		context = config.server.context
+		context = config.container.context?.trim() ?: "${rootProject.name}-${project.name}"
+		file = file("$buildDir/libs/${project.name}-${version}.war")
+	}
+
+	// Remote Deployment Configuration ########################################
+	remote {
+		containerId = config.container.containerId
+		hostname = config.container.remote.hostname
+		username = config.container.remote.username
+		password = config.container.remote.password
 	}
 
 	local {
 		installer {
-			installUrl = 'http://download.jboss.org/jbossas/7.1/jboss-as-7.1.1.Final/jboss-as-7.1.1.Final.zip'
+			installUrl = config.container.installUrl?.trim() ?: 'http://mirror.switch.ch/mirror/apache/dist/tomcat/tomcat-8/v8.0.9/bin/apache-tomcat-8.0.9.zip'
 			downloadDir = file("$buildDir/download")
 			extractDir = file("$buildDir/extract")
 		}
-
-		configFile {
-			file = file("$rootDir/dist/src/main/resources/conf/standalone.xml")
-			toDir = new File('configuration')
-		}
-
-		jvmArgs = "-Xdebug -Xrunjdwp:transport=dt_socket,address=8001,server=y,suspend=n"
 	}
-
 }
 
 task cargoAddJBossModules(type: Copy) {
@@ -58,6 +61,8 @@ task cargoAddJBossModules(type: Copy) {
 	from "$rootDir/dist/src/main/resources/jboss/modules"
 	into "$buildDir/extract/jboss-as-7.1.1.Final/jboss-as-7.1.1.Final/modules"
 }
+
+
 
 cargoRunLocal.dependsOn assemble
 cargoRunLocal.dependsOn cargoAddJBossModules

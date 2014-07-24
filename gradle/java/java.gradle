@@ -8,12 +8,18 @@ sourceCompatibility = 1.8
 // ############################################################################
 // Source Sets
 // ############################################################################
-sourceSets {
-	generated {
-        java {
-            srcDir 'src/generated/java'
-        }
-    }
+apply from: "$rootDir/gradle/java/sourcesets.gradle"
+
+// ############################################################################
+// Source Code generators (AnnotationProcessors)
+// ############################################################################
+
+compileJava {
+	doFirst {
+		options.compilerArgs = [
+			'-s', sourceSets.generated.java.srcDirs.iterator().next()
+		]
+	}
 }
 
 // ############################################################################
@@ -22,14 +28,9 @@ sourceSets {
 apply from: "$rootDir/gradle/java/dependencies.gradle"
 
 // ############################################################################
-// Cargo
-// ############################################################################
-apply from: "$rootDir/gradle/cargo.gradle"
-
-// ############################################################################
 // Unit & Integration Tests & & Functional Tests & JMeter Tests
 // ############################################################################
-apply from: "$rootDir/gradle/integrationTest.gradle"
+apply from: "$rootDir/gradle/java/integrationTests.gradle"
 
 // apply from: "$rootDir/gradle/functionalTest.gradle"
 
@@ -40,6 +41,9 @@ apply from: "$rootDir/gradle/loadTest.gradle"
 // Build & Distribution
 // ############################################################################
 jar {
+	
+	from project.sourceSets.main.allJava
+
 	manifest {
 		attributes 'Implementation-Title' : rootProject.name + "-" + project.name, 'Implementation-Version' : version
 	}

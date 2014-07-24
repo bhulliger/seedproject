@@ -2,27 +2,18 @@
 // Source Sets
 // ############################################################################
 sourceSets {
-	integrationTest {
-		java.srcDir file('src/integrationTest/java')
-		resources.srcDir file('src/integrationTest/resources')
-		sourceSets.each {
-			compileClasspath += it.output
-		}
-		compileClasspath += configurations.testRuntime
-		
-		runtimeClasspath = output + compileClasspath
-	}
+	integTest {
+        java.srcDir 'src/integTest/java'
+        resources.srcDir 'src/integTest/resources'
+    }   
 }
 
 // ############################################################################
 // Task definition for Integration Tests
 // ############################################################################
-task integrationTest(type: Test) {
-	description 'Run the integration tests'
-	group = 'verification'
-
-	testClassesDir = sourceSets.integrationTest.output.classesDir
-	classpath = sourceSets.integrationTest.runtimeClasspath
+integrationTest {
+	testClassesDir = sourceSets.integTest.output.classesDir
+	classpath = sourceSets.integTest.runtimeClasspath
 
 	reports {
 		junitXml {
@@ -30,14 +21,13 @@ task integrationTest(type: Test) {
 		}
 	}
 }
-
 // ############################################################################
 // Database integration tests
 // ############################################################################
 // apply from: "$rootDir/gradle/databaseSetup.gradle"
 
-// integrationTest.dependsOn startAndPrepareDatabase
-// stopDatabase.dependsOn integrationTest
+// integTest.dependsOn startAndPrepareDatabase
+// stopDatabase.dependsOn integTest
 
 // task databaseIntegrationTest(dependsOn: stopDatabase)
 
