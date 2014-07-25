@@ -1,7 +1,7 @@
 // ############################################################################
 // Group Definition
 // ############################################################################
-group = 'test'
+group = '<your group goes here>'
 
 // ############################################################################
 // System Environment
@@ -246,6 +246,8 @@ task initProject(type: Copy, dependsOn: cloneRepo) {
 	description "initializes the root project with the distribution files."
 	group "Initialization"
 
+	dependsOn subprojects.initProject
+
 	from "$rootDir/$config.templates.path/skeleton/dist" 
 	into "dist"
 }
@@ -253,6 +255,8 @@ task initProject(type: Copy, dependsOn: cloneRepo) {
 task scaffold(dependsOn: initProject) {
 	description "Scaffolds the project based on a sample seed project. "
 	group "Initialization"
+
+	dependsOn subprojects.scaffold
 
 	doLast {
 		if (config.os.type != 'win') {
