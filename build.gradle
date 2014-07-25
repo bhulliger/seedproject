@@ -127,6 +127,10 @@ subprojects {
 	task initProject(type: Copy) {
 		description "initializes the project structure with all required packages and build files."
 
+		// At least create a build.gradle and the folders for each projects (even for the ones without templates.)
+		new File("$rootDir/" + project.path.replaceAll(":", "/")).mkdirs()
+		new File("$rootDir/" + project.path.replaceAll(":", "/") + "/build.gradle").text = "/* here goes your gradle configuration */"	
+
 		if (project.getChildProjects().isEmpty()) {
 			from "$rootDir/$config.templates.path/skeleton/" + project.path.replaceAll(":", "/")
 			into "$rootDir" + project.path.replaceAll(":", "/")
@@ -138,6 +142,7 @@ subprojects {
 	// ########################################################################
 	task scaffold(dependsOn: initProject) {
 		description "Scaffolds a basic application based on the provided template structure (in dist/src/main/resources/build.groovy)"
+		
 		ext.templateBasePath = "$rootDir/$config.templates.path" + "/scaffolding/" + project.path.replaceAll(":", "/") + "/"
 	}
 }
@@ -231,7 +236,7 @@ task cloneRepo(type: com.palominolabs.gradle.task.git.clone.GitCloneTask) {
     dir = destination
     treeish = config.templates.treeish
     
-    enabled = !destination.exists() //to clone only once
+    enabled = !destination.exists() // to clone only once
 }
 
 task initProject(type: Copy, dependsOn: cloneRepo) {
