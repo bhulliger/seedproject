@@ -129,8 +129,7 @@ subprojects {
 
 		// At least create a build.gradle and the folders for each projects (even for the ones without templates.)
 		new File("$rootDir/" + project.path.replaceAll(":", "/")).mkdirs()
-		new File("$rootDir/" + project.path.replaceAll(":", "/") + "/build.gradle").text = "/* here goes your gradle configuration */"	
-
+		
 		if (project.getChildProjects().isEmpty()) {
 			from "$rootDir/$config.templates.path/skeleton/" + project.path.replaceAll(":", "/")
 			into "$rootDir" + project.path.replaceAll(":", "/")
@@ -231,6 +230,9 @@ gradle.projectsEvaluated {
 // ############################################################################
 //import org.ajoberstar.gradle.git.tasks.*
 task cloneRepo(type: com.palominolabs.gradle.task.git.clone.GitCloneTask) {
+	description "Checkout a copy of the project templates from a remote repository"
+	group "Initialization"
+
     def destination = file("$rootDir/$config.templates.path")
     uri = config.templates.scm
     dir = destination
@@ -240,13 +242,18 @@ task cloneRepo(type: com.palominolabs.gradle.task.git.clone.GitCloneTask) {
 }
 
 task initProject(type: Copy, dependsOn: cloneRepo) {
+
 	description "initializes the root project with the distribution files."
+	group "Initialization"
+
 	from "$rootDir/$config.templates.path/skeleton/dist" 
 	into "dist"
 }
 
-task scaffold(dependsOn: cloneRepo) {
-	dependsOn subprojects.scaffold
+task scaffold(dependsOn: initProject) {
+	description "Scaffolds the project based on a sample seed project. "
+	group "Initialization"
+
 	doLast {
 		if (config.os.type != 'win') {
 			// the gradle job prohibits to delete the templates dir in windows.
@@ -258,8 +265,10 @@ task scaffold(dependsOn: cloneRepo) {
 // ############################################################################
 // Project Cleanup
 // ############################################################################
-task deleteAll() << {
+task deleteAll << {
 	description 'Removes all subprojects and the content. Don`t use this lightly!'
+	group "Initialization"
+
 	delete 'bin'
 	delete 'build'
 	delete '.gradle'
