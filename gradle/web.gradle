@@ -34,7 +34,7 @@ processResources {
 }
 
 // ############################################################################
-// Project Initialization
+// Project initialization
 // ############################################################################
 initProject {
 	webAppDir.mkdirs()
