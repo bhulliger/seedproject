@@ -50,6 +50,18 @@ jar {
 }
 
 // ############################################################################
+// Project Initialization
+// ############################################################################
+initProject {
+	sourceSets*.java.srcDirs*.each {
+		new File(it.toString() + "/" + rootProject.group.replaceAll('\\.', '/') + '/' + rootProject.name + '/' + project.name).mkdirs()
+	}
+	sourceSets*.resources.srcDirs*.each {
+		new File(it.toString() + "/" + rootProject.group.replaceAll('\\.', '/') + '/' + rootProject.name + '/' + project.name).mkdirs()
+	}
+}
+
+// ############################################################################
 // Reporting
 // ############################################################################
 jacocoTestReport {

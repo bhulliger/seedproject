@@ -32,3 +32,12 @@ processResources {
 	filter(ReplaceTokens, tokens: [ 'version': project.version.toString(), 'buildTime': buildTimestamp ] )
 	exclude '*.mdsd'
 }
+
+// ############################################################################
+// Project Initialization
+// ############################################################################
+initProject {
+	webAppDir.mkdirs()
+	new File(webAppDir.toString() + "/WEB-INF").mkdirs()
+	new File(webAppDir.toString() + "/META-INF").mkdirs()
+}

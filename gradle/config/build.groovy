@@ -3,7 +3,7 @@
 // ############################################################################
 templates {
 	scm = "https://github.com/bhulliger/seedproject_templates.git"
-	treeish = 'd885d522260a34fa4cbbd9e8d3c891075888dbfc'
+	treeish = 'd9148167e0d5d088a100f82ad660c527ecf4cf3a'
 	path = "_templates"
 }	
 
@@ -11,7 +11,7 @@ templates {
 // Operating System & Servers
 // ############################################################################
 os {
-	type = "win" // unix / win
+	type = "unix" // unix / win
 }
 
 container {
@@ -32,7 +32,7 @@ jenkins {
 
 	// project-based security: User or group that has access to the project. 
 	authorization {
-		permission = "<jenkins permission>" // Optional
+		permission = "Anonymous" // Optional
 	}
 
 	// credentials ID for scm access. the credentials ID must be accessed from the jenkins configuration file.
@@ -49,15 +49,15 @@ jenkins {
 
 sonar {
 	host {
-		url = "<sonar url>" // URL where sonar can be reached
+		url = "http://localhost:9000" // URL where sonar can be reached
 	}
 	jdbc {
 		// JDBC Configuration for the sonar server. These configurations can be found in your sonar.properties 
 		// file in your sonar intallation.
 		url = "<jdbc url of sonar configuration>" // jdbc url of sonar
 		driverClassName = "<driverClass>" // jdbc driver class
-		username = "<sonarUser>" // db username for sonar
-		password = "<sonarPassword>" // db password for sonar
+		username = "admin" // db username for sonar
+		password = "admin" // db password for sonar
 	}
 
 	projectName = "<sonarProjectName>" // human readable project name in sonar
@@ -100,9 +100,9 @@ android {
 // Artifacts
 // ############################################################################
 artifactRepository {
-	url = "<artifactoryURL>" // The context URL of your artifactory
-	username = "<artifactoryUser>" // Credentials to upload artifacts
-	password = "<artifactoryPassword>" // ''
+	url = "http://localhost:8081/artifactory" // The context URL of your artifactory
+	username = "admin" // Credentials to upload artifacts
+	password = "password" // ''
 	name = "<artifactoryName>" // name of your artifact repository
 	publicRepo = "<artifactoryPublicRepo>" // public repo name of the artifact repository
 }
