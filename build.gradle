@@ -112,16 +112,6 @@ subprojects {
 	}
 
 	// ########################################################################
-	// Tests
-	// ########################################################################
-	task integrationTest(type: Test) {
-		description = "Run the integration tests. (long running tests and tests with external resources)"
-		group = "verification"
-
-		// extend this test for your own projects if necessary
-	}
-
-	// ########################################################################
 	// Project Initialization
 	// ########################################################################
 	task initProject(type: Copy) {

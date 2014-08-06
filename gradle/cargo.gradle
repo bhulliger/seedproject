@@ -55,23 +55,15 @@ cargo {
 	}
 }
 
-task cargoAddJBossModules(type: Copy) {
-	description 'Copies the JBoss Module to Cargo'
-	// Modules
-	from "$rootDir/dist/src/main/resources/jboss/modules"
-	into "$buildDir/extract/jboss-as-7.1.1.Final/jboss-as-7.1.1.Final/modules"
-}
-
 
 task printCargoRunConfig << {
 	println "#####################################################################"
 	println "# Running app 		'${project.name}'"
 	println "# ApplicationServer: 	" + cargo.containerId
-	println "# URL: 			http://localhost:" + cargo.port + "/" + config.container.context?.trim() ?: "${rootProject.name}-${project.name}"
+	println "# URL: 			http://localhost:" + cargo.port + "/${rootProject.name}-${project.name}"
 	println "#####################################################################"
 }
 
 cargoRunLocal.dependsOn printCargoRunConfig
 
 cargoRunLocal.dependsOn assemble
-cargoRunLocal.dependsOn cargoAddJBossModules

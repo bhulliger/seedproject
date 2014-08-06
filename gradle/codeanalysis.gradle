@@ -11,8 +11,8 @@ sonarRunner {
         property "sonar.jdbc.driverClassName", config.sonar.jdbc.driverClassName
         property "sonar.jdbc.username", config.sonar.jdbc.username
         property "sonar.jdbc.password", config.sonar.jdbc.password
-		property "sonar.projectName", config.sonar.projectName
-		property "sonar.projectKey", config.sonar.projectKey
+		property "sonar.projectName", "${rootProject.name}"
+		property "sonar.projectKey", "${rootProject.group}.${rootProject.name}"
 		property "sonar.exclusions" , config.sonar.exclusions
 		property "sonar.jacoco.excludes", config.sonar.jacoco.excludes
 		property "sonar.sourceEncoding", "UTF-8"

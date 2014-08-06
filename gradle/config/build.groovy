@@ -3,7 +3,7 @@
 // ############################################################################
 templates {
 	scm = "https://github.com/bhulliger/seedproject_templates.git"
-	treeish = 'd9148167e0d5d088a100f82ad660c527ecf4cf3a'
+	treeish = '215129c6cd25b12e939dfe4e59e38f3a398442c3'
 	path = "_templates"
 }	
 
@@ -54,14 +54,12 @@ sonar {
 	jdbc {
 		// JDBC Configuration for the sonar server. These configurations can be found in your sonar.properties 
 		// file in your sonar intallation.
-		url = "<jdbc url of sonar configuration>" // jdbc url of sonar
-		driverClassName = "<driverClass>" // jdbc driver class
-		username = "admin" // db username for sonar
-		password = "admin" // db password for sonar
+		url = "jdbc:h2:tcp://localhost:9092/sonar" // jdbc url of sonar
+		driverClassName = "" // jdbc driver class
+		username = "sonar" // db username for sonar
+		password = "sonar" // db password for sonar
 	}
 
-	projectName = "<sonarProjectName>" // human readable project name in sonar
-	projectKey = "<sonarProjectKey>" // project key in sonar
 	exclusions = "" // (Optional) regex pattern for file exclusions
 	jacoco {	
 		excludes = ""; // (Optional). regex patterns for jacoco exclusions
@@ -100,11 +98,10 @@ android {
 // Artifacts
 // ############################################################################
 artifactRepository {
-	url = "http://localhost:8081/artifactory" // The context URL of your artifactory
+	url = "http://localhost:8081/artifactory/" // The context URL of your artifactory
 	username = "admin" // Credentials to upload artifacts
 	password = "password" // ''
-	name = "<artifactoryName>" // name of your artifact repository
-	publicRepo = "<artifactoryPublicRepo>" // public repo name of the artifact repository
+	publicRepo = "http://localhost:8081/artifactory/public/" // public repo name of the artifact repository
 }
 
 // ############################################################################
@@ -117,17 +114,8 @@ environments {
 	// ########################################################################
 	dev {
 		env = "dev"
-		
-		db {
-			driver = "org.hsqldb.jdbcDriver"
-			type = "hsqldb"
-			url = "jdbc:hsqldb:file:c:/tmp/seedproject/hsqldb/db;shutdown=true" // TODO
-			user = "sa"
-			password = ""
-			jndiName = "java:/seedprojectDB" // TODO
-			jndiNameAdmin = "java:/seedprojectDBAdmin" // TODO
-			poolName = "seedprojectPool" // TODO
-		}
+
+		// TODO
 	}
 
 	// ########################################################################

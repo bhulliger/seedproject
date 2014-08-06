@@ -1,26 +1,25 @@
-buildscript {
-    repositories {
-        maven { 
-			url 'http://repo.jfrog.org/artifactory/gradle-plugins' 
+// ############################################################################
+// Publish Artifacts to Artifactory
+// ############################################################################
+apply plugin: 'maven-publish'
+
+publishing {
+	publications {
+		webApp(MavenPublication) {
+			from components.web
 		}
-    }
-    
-	dependencies {
-		classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:2.1.0'
-    }
-}
+	}
 
-apply plugin: org.jfrog.gradle.plugin.artifactory.ArtifactoryConfigurationsPlugin
+	repositories {
+		maven {
+			url config.artifactRepository.url + ( project.version.toString().endsWith('-SNAPSHOT') ? 'libs-snapshot-local' : 'libs-release-local')
 
-ext.artifactoryUrl = config.artifactRepository.url
-ext.artifactoryUsername = config.artifactRepository.username
-ext.artifactoryPassword = config.artifactRepository.password
+			credentials {
+				username = config.artifactRepository.username
+				password = config.artifactRepository.password
+			}
+		}
 
-artifactory {
-	publish {
-	    contextUrl = artifactoryUrl
-		repoKey = project.version.endsWith('-SNAPSHOT') ? 'libs-snapshot-local' : 'libs-release-local'
-		username = artifactoryUsername
-		password = artifactoryPassword
+
 	}
 }

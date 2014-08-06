@@ -11,7 +11,10 @@ sourceSets {
 // ############################################################################
 // Task definition for Integration Tests
 // ############################################################################
-integrationTest {
+task integrationTest(type: Test) {
+	description 'Run the integration tests (long running tests and tests with external resources)'
+	group = 'verification'
+
 	testClassesDir = sourceSets.integTest.output.classesDir
 	classpath = sourceSets.integTest.runtimeClasspath
 
