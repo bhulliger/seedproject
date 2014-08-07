@@ -40,4 +40,8 @@ initProject {
 	webAppDir.mkdirs()
 	new File(webAppDir.toString() + "/WEB-INF").mkdirs()
 	new File(webAppDir.toString() + "/META-INF").mkdirs()
+
+	// loadtests dir
+	project.path.replaceAll('\\:', '/')
+	new File("$projectDir/src/loadTest/resources").mkdirs()
 }
