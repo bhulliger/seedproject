@@ -584,11 +584,7 @@ jenkins {
                 }
 
                 steps {
-<<<<<<< HEAD
                     gradle ('cargoDeployRemote', '-Penv=prod', true) { node -> 
-=======
-                    gradle ('cargoDeploy', '-Penv=prod', true) { node -> 
->>>>>>> 5d5ae0d92bb55409a9857f9283675d4f37c20ef9
                         node / fromRootBuildScriptDir << true
                     }
 

@@ -124,6 +124,19 @@ environments {
 			username = 'tomcat'
 			password = 'tomcat'
 			remoteDir = '/var/opt/testing/seedproject'
+			context = ''
+
+			jndiName = ''
+			jndiNameAdmin = ''
+			poolName = ''
+		}
+
+		db {
+			driver = ''
+			url = ''
+			username = ''
+			password = ''
+			type = ''
 		}
 
 		// Optional. Required if Deployment is done by Cargo (not Bashscript)

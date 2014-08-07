@@ -1,1 +1,1 @@
-include "app:web", "shared:core"
+include "app:web", "shared:core", "dist"
