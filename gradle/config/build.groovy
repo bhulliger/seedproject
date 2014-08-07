@@ -3,7 +3,7 @@
 // ############################################################################
 templates {
 	scm = "https://github.com/bhulliger/seedproject_templates.git"
-	treeish = '215129c6cd25b12e939dfe4e59e38f3a398442c3'
+	treeish = '50e906a98decd75c3947baaf3215ef4152464063'
 	path = "_templates"
 }	
 
@@ -114,6 +114,28 @@ environments {
 	// ########################################################################
 	dev {
 		env = "dev"
+
+		// Optional. Required if Deployment is done by Bash-Script (not Cargo)
+		server {
+			hostname = 'localhost'
+			ip = '127.0.0.1' 
+			port = 8088
+
+			username = 'tomcat'
+			password = 'tomcat'
+			remoteDir = '/var/opt/testing/seedproject'
+		}
+
+		// Optional. Required if Deployment is done by Cargo (not Bashscript)
+		container {
+			remote {
+				hostname = 'localhost'
+				port = 8088
+				username = 'tomcat'
+				password = 'tomcat'
+
+			}
+		}
 
 		// TODO
 	}

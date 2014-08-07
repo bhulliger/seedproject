@@ -294,7 +294,7 @@ jenkins {
                 description "Perform code health check. Fail build for low quality, Record progress over time. (<a href='${config.jenkins.url}/dashboard/index/GROUP:NAME'>Sonar</a>)"
 
                 steps {
-                    gradle ('sonarRunner', '', true) { node -> 
+                    gradle ('check sonarRunner', '', true) { node -> 
                         node / fromRootBuildScriptDir << true
                     }
                 }
@@ -393,7 +393,7 @@ jenkins {
                 description 'Installs the binaries on the integration server <a href="${config.environments.integration.server.url}">${config.environments.integration.server.url}</a>'
 
                 steps {
-                    gradle ('deploy', '-Penv=integration', true) { node -> 
+                    gradle ('cargoDeploy', '-Penv=integration', true) { node -> 
                         node / fromRootBuildScriptDir << true
                     }
 
@@ -403,7 +403,7 @@ jenkins {
 
                     // Trigger parameterized build on other projects
                     downstreamParameterized {
-                        trigger ("${rootProject.name}-acceptance_tests", 'SUCCESS', true, ['buildStepFailure': 'FAILURE', 'failure' : 'FAILURE', 'unstable' : 'UNSTABLE']) {
+                        trigger ("${rootProject.name}-acceptance_tests, ${rootProject.name}-performance_tests", 'SUCCESS', true, ['buildStepFailure': 'FAILURE', 'failure' : 'FAILURE', 'unstable' : 'UNSTABLE']) {
                             currentBuild() // Current Build Parameters
                             predefinedProps(['SOUCE_BUILD_NUMBER':'${BUILD_NUMBER}', 'SVN_REVISION' : '${SVN_REVISION}', 'GIT_COMMIT' : '${GIT_COMMIT}'])
                             setTriggerWithNoParameters false
@@ -435,7 +435,7 @@ jenkins {
 
                     // Trigger parameterized build on other projects
                     downstreamParameterized {
-                        trigger ("${rootProject.name}-performance_tests", 'SUCCESS', true, ['buildStepFailure': 'FAILURE', 'failure' : 'FAILURE', 'unstable' : 'UNSTABLE']) {
+                        trigger ("${rootProject.name}-deploy_test", 'SUCCESS', true, ['buildStepFailure': 'FAILURE', 'failure' : 'FAILURE', 'unstable' : 'UNSTABLE']) {
                             currentBuild() // Current Build Parameters
                             predefinedProps(['SOUCE_BUILD_NUMBER':'${BUILD_NUMBER}', 'SVN_REVISION' : '${SVN_REVISION}', 'GIT_COMMIT' : '${GIT_COMMIT}'])
                             setTriggerWithNoParameters false
@@ -555,7 +555,7 @@ jenkins {
                 }
 
                 steps {
-                    gradle ('writeVersionFile cargoDeployRemote', '-Penv=test', true) { node -> 
+                    gradle ('writeVersionFile cargoDeploy', '-Penv=test', true) { node -> 
                         node / fromRootBuildScriptDir << true
                     }
                 }
@@ -596,7 +596,7 @@ jenkins {
                 }
 
                 steps {
-                    gradle ('autoinstall', '-Penv=prod', true) { node -> 
+                    gradle ('cargoDeploy', '-Penv=prod', true) { node -> 
                         node / fromRootBuildScriptDir << true
                     }
 

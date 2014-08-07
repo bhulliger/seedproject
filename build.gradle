@@ -67,6 +67,8 @@ buildscript {
 		classpath 'com.googlecode.flyway:flyway-gradle-plugin:2.2.1'
 		classpath 'com.android.tools.build:gradle:0.12.2'
 		classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.4'
+		classpath 'org.hidetake:gradle-ssh-plugin:0.3.10'
+
 	}
 }
 
@@ -145,8 +147,10 @@ def webProjects() {
 
 gradle.projectsEvaluated {
 	configure(webProjects()) {
-		apply from: "$rootDir/gradle/cargo.gradle"
-		apply from: "$rootDir/gradle/web.gradle"
+		apply from: "$rootDir/gradle/web/cargo.gradle"
+		apply from: "$rootDir/gradle/web/web.gradle"
+		apply from: "$rootDir/gradle/web/functionalTests.gradle"
+		apply from: "$rootDir/gradle/web/loadTests.gradle"
 	}
 }
 
@@ -160,6 +164,7 @@ def javaProjects() {
 gradle.projectsEvaluated {
 	configure(javaProjects()) {
 		apply from: "$rootDir/gradle/java/java.gradle"
+		apply from: "$rootDir/gradle/java/integrationTests.gradle"
 	}
 }
 
@@ -259,9 +264,7 @@ task scaffold(dependsOn: initProject) {
 // ############################################################################
 // Project Cleanup
 // ############################################################################
-task deleteAll << {
-	description 'Removes all subprojects and the content. Don`t use this lightly!'
-	group "Initialization"
+task deleteAll(type: Copy, group: 'Cleanup', description: 'Removes all subprojects and the content. Don`t use this lightly!') << {
 
 	delete 'bin'
 	delete 'build'

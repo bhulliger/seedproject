@@ -1,0 +1,23 @@
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath "com.github.kulya:jmeter-gradle-plugin:1.3.2-2.9"
+	}
+}
+
+apply plugin: com.github.kulya.gradle.plugins.jmeter.JmeterPlugin
+
+ext.loadTestResources = "$projectDir/src/loadTest/resources"
+ext.loadTestContext = config.container.context?.trim() ?: "${rootProject.name}-${project.name}";
+
+jmeterRun.configure {
+	jmeterTestFiles = [file("$loadTestResources/test-plan.jmx")]
+	jmeterPropertyFile = file("$loadTestResources/jmeter.properties")
+	jmeterUserProperties = [	"hostname=${config.server.hostname}",
+								"port=${config.server.port}",
+								"context=${loadTestContext}"	
+							]
+	logging.captureStandardError LogLevel.INFO
+}

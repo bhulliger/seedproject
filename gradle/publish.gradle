@@ -8,6 +8,8 @@ publishing {
 		webApp(MavenPublication) {
 			from components.web
 		}
+
+		
 	}
 
 	repositories {
