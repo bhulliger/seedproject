@@ -28,16 +28,6 @@ compileJava {
 apply from: "$rootDir/gradle/java/dependencies.gradle"
 
 // ############################################################################
-// Unit & Integration Tests & & Functional Tests & JMeter Tests
-// ############################################################################
-apply from: "$rootDir/gradle/java/integrationTests.gradle"
-
-// apply from: "$rootDir/gradle/functionalTest.gradle"
-
-apply from: "$rootDir/gradle/loadTest.gradle"
-
-
-// ############################################################################
 // Build & Distribution
 // ############################################################################
 jar {

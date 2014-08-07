@@ -1,0 +1,159 @@
+// ############################################################################
+// Source Sets & BuildScript
+// ############################################################################
+buildscript {
+	repositories {
+		mavenCentral()
+		jcenter()
+	}
+	dependencies {
+		classpath 'org.gradle.api.plugins:gradle-cargo-plugin:1.5'
+	}
+}
+
+apply plugin: org.gradle.api.plugins.cargo.CargoPlugin
+
+// ############################################################################
+// Dependencies
+// ############################################################################
+
+
+configurations {
+	cargo
+	tomcatAnt
+}
+
+dependencies {
+
+	cargo 		group: 'org.codehaus.cargo', 		name: 'cargo-core-uberjar', 			version: '1.4.8'
+	cargo 		group: 'org.codehaus.cargo', 		name: 'cargo-ant', 						version: '1.4.8'
+	cargo 		group: 'org.jboss.as',				name: 'jboss-as-controller-client', 	version: '7.2.0.Final'
+	cargo 		group: 'org.wildfly', 				name: 'wildfly-controller-client', 		version: '8.0.0.Final'
+	cargo 		group: 'org.codehaus.cargo', 		name: 'cargo-ant', 						version: '1.4.5'    
+
+	tomcatAnt 	group: 'org.apache.tomcat', 		name: 'tomcat-catalina-ant', 			version: '7.0.39'
+}
+
+// ############################################################################
+// Download Artifact from Artifactory
+// ############################################################################
+ext.downloadedArtifact = file("$buildDir/libs/$war.archiveName")
+task downloadBinaryArchive(type: helper.BinaryDownload) {
+	ext {
+		repoPath = project.group.replaceAll('\\.', '/')
+		repoBaseArtifactName = war.baseName
+		repoVersion = war.version
+		repoArtifact = war.archiveName
+		repoName = project.version.toString().endsWith('-SNAPSHOT') ? 'libs-snapshot-local' : 'libs-release-local'
+		binaryUrl = "${config.artifactRepository.url}/${repoName}/${repoPath}/${repoBaseArtifactName}/${repoVersion}/${repoArtifact}"
+	}
+	sourceUrl = binaryUrl
+	targetBinary = downloadedArtifact
+	
+}
+
+
+// ############################################################################
+// Cargo Configuration
+// ############################################################################
+cargo {
+	containerId = config.container.containerId
+	port = config.container.port
+	
+	deployable {
+		context = config.container.context?.trim() ?: "${rootProject.name}-${project.name}"
+		file = downloadedArtifact	
+	}
+
+	// Remote Deployment Configuration ########################################
+	remote {
+		hostname = config.container.remote.hostname
+		username = config.container.remote.username
+		password = config.container.remote.password
+	}
+
+	local {
+		installer {
+			installUrl = config.container.installUrl
+			downloadDir = file("$buildDir/download")
+			extractDir = file("$buildDir/extract")
+		}
+
+		deployable {
+			file = file("$buildDir/libs/$war.archiveName")
+		}
+	}
+}
+
+task printCargoRunConfig << {
+	println "#####################################################################"
+	println "# Running app 		'${project.name}'"
+	println "# ApplicationServer: 	" + cargo.containerId
+	println "# URL: 			http://localhost:" + cargo.port + "/${rootProject.name}-${project.name}"
+	println "#####################################################################"
+}
+
+cargoRunLocal.dependsOn printCargoRunConfig
+cargoRunLocal.dependsOn assemble
+
+// ############################################################################
+// Remote Deployment (by cargo)
+// ############################################################################
+// download artifact from binary repository and undeploy existing one
+cargoDeployRemote.dependsOn downloadBinaryArchive, cargoUndeployRemote
+
+ext.appContextStatus = {
+	String serverUrl = "http://${config.server.ip}:${config.server.port}/manager/text"
+	ant.taskdef(name: 'list', classname: 'org.apache.catalina.ant.ListTask', classpath: configurations.tomcatAnt.asPath)
+
+	try {
+		ant.list(url: serverUrl, username: config.server.username, password: config.server.password, outputproperty: 'appContextStatus')
+		String appContextStatus = ant.properties.appContextStatus
+		return appContextStatus.contains("/${config.server.context}:running") || appContextStatus.contains("/${config.server.context}:stopped")
+	} catch (Exception e) {
+		logger.error "Failed to connect to '$serverUrl': $e.message"
+		return false;
+	}
+}
+
+cargoUndeployRemote {
+	// only undeploy if URL context exists
+	onlyIf appContextStatus
+}
+
+// ############################################################################
+// Remote Deployment (by bash script)
+// ############################################################################
+apply plugin: 'ssh'
+
+remotes {
+	remoteServer {
+		host = "${config.server.ip}"
+		user = config.server.username
+		password = config.server.password
+	}
+}
+
+ext.autoinstallRemoteDirectory = config.server.remoteDir
+
+task autoinstall(type: SshTask, dependsOn: downloadBinaryArchive) {
+
+	description "Deploy the artifact by running the autoinstall.sh bash script on the remote server after unpacking the archive there."
+	group 'Deployment'
+
+	ssh {
+		knownHosts = allowAnyHosts
+		pty = true
+	}
+
+	session(remotes.remoteServer) {
+		execute("set +e; rm -R ${config.server.remoteDir}")
+		put downloadedArtifact, "${config.server.remoteDir}"
+		execute("cd ${config.server.remoteDir}; unzip -o distribution-*.zip; ./autoinstall.sh; cd -;")
+	}
+}
+
+
+
+
+

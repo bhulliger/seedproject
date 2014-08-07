@@ -1,3 +1,7 @@
+// ############################################################################
+// Run Functional Tests (Selenium and others) in a jetty server
+// ############################################################################
+
 apply plugin: 'jetty'
 apply plugin: 'groovy'
 
@@ -6,23 +10,30 @@ configurations {
     functTestRuntime.extendsFrom testRuntime
 }
 
+// ############################################################################
+// Dependencies for all projects
+// ############################################################################
 ext.seleniumGroup = 'org.seleniumhq.selenium'
 ext.seleniumVersion = '2.32.0'
 
 dependencies {
-    providedCompile 'javax.servlet:servlet-api:2.5'
-    runtime 'javax.servlet:jstl:1.1.2'
-    testCompile 'org.codehaus.groovy:groovy:2.0.6'
-    testCompile 'junit:junit:4.11'
-    functTestCompile 'org.codehaus.geb:geb-junit4:0.7.2'
-    functTestCompile "$seleniumGroup:selenium-api:$seleniumVersion"
-    functTestRuntime "$seleniumGroup:selenium-firefox-driver:$seleniumVersion"
+    providedCompile     group: 'javax.servlet',         name: 'servlet-api',            version: '2.5'
+    runtime             group: 'javax.servlet',         name: 'jstl',                   version: '1.1.2'
+
+    testCompile         group: 'org.codehaus.groovy',   name: 'groovy',                 version: '2.0.6'
+    testCompile         group: 'junit',                 name: 'junit',                  version: '4.11'
+    functTestCompile    group: 'org.codehaus.geb',      name: 'geb-junit4',             version: '0.7.2'
+    functTestCompile    group: "$seleniumGroup",        name: 'selenium-api',           version: "$seleniumVersion"
+    functTestRuntime    group: "$seleniumGroup",        name: 'selenium-firefox-driver', version: "$seleniumVersion"
 }
 
+// ############################################################################
+// Source Set Definition
+// ############################################################################
 sourceSets {
     functionalTest {
-        groovy.srcDir file('src/functTest/groovy')
-        resources.srcDir file('src/functTest/resources')
+        java.srcDir file('src/functionalTest/groovy')
+        resources.srcDir file('src/functionalTest/resources')
         compileClasspath = sourceSets.main.output + configurations.functTestCompile
         runtimeClasspath = output + compileClasspath + configurations.functTestRuntime
     }
@@ -38,14 +49,19 @@ ext {
 	functionalJettyHttpPort = 8050
     functionalJettyStopPort = 8051
     functionalJettyStopKey = 'stopKey'
-	functionalJettyContextPath = 'todo'
+	functionalJettyContextPath = config.container.context?.trim() ?: "${rootProject.name}-${project.name}"
 }
 
 task localFunctionalTest(type: Test) {
     testClassesDir = sourceSets.functionalTest.output.classesDir
     classpath = sourceSets.functionalTest.runtimeClasspath
-    testReportDir = functionalTestReportDir
-    testResultsDir = functionalTestResultsDir
+
+    reports {
+        junitXml {
+            destination = file("$reportsDir/functional")
+        }
+    }
+
     systemProperties functionalCommonSystemProperties
     systemProperty 'geb.build.baseUrl', "http://localhost:$functionalJettyHttpPort/$functionalJettyContextPath/"
 }
@@ -71,8 +87,13 @@ task inContainerFunctionalTest(dependsOn: functionalJettyStop)
 task remoteFunctionalTest(type: Test) {
     testClassesDir = sourceSets.functionalTest.output.classesDir
     classpath = sourceSets.functionalTest.runtimeClasspath
-    testReportDir = functionalTestReportDir
-    testResultsDir = functionalTestResultsDir
+
+    reports {
+        junitXml {
+            destination = file("$reportsDir/functional")
+        }
+    }
+
     systemProperties functionalCommonSystemProperties
     systemProperty 'geb.build.baseUrl', "http://$config.server.hostname:$config.server.port/$config.server.context/"
 }

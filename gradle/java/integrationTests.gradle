@@ -20,7 +20,7 @@ task integrationTest(type: Test) {
 
 	reports {
 		junitXml {
-			destination = file("$reports,junitXml,destination/integration")
+			destination = file("$reportsDir/integration")
 		}
 	}
 }
