@@ -3,7 +3,7 @@
 // ############################################################################
 templates {
 	scm = "https://github.com/bhulliger/seedproject_templates.git"
-	treeish = '4fb4a4eb609c85c5bba482eb9b33b4bcaeadc4bd'
+	treeish = '9611b229d21b95797a2786027e2fbd0f80f67af9'
 	path = "_templates"
 }	
 

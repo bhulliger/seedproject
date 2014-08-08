@@ -1,0 +1,165 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+import org.apache.tools.ant.filters.FixCrLfFilter
+
+configurations {
+	flywayJar
+}
+
+// ############################################################################
+// QA & Code Analysis
+// ############################################################################
+sonarRunner {
+	skipProject = true
+}
+
+// ############################################################################
+// Dependencies
+// ############################################################################
+
+dependencies {
+	// Flyway
+	flywayJar	group: 	'org.flywaydb', 	name: 'flyway-gradle-plugin',  	version: '3.+'
+	flywayJar	group: 	'org.flywaydb', 	name: 'flyway-commandline',  	version: '3.+'
+	flywayJar	group: 	'org.flywaydb', 	name: 'flyway-core',  			version: '3.+'
+
+	// HsqlDB
+	// flywayJar 	group: 	'org.hsqldb',		name: 'hsqldb', 				version: '2.3.+'
+
+	// Oracle JDBC
+	// flywayJar 	group: 	'oracle', 			name: 'jdbc',					version: '6.0'
+}
+
+// ############################################################################
+// Distribution && Installation
+// ############################################################################
+evaluationDependsOn ":app:web"
+
+task distZip(type: Zip, dependsOn: ":app:web:war")  {
+
+	ext.tokens = [
+		serverIp: config.server.ip,
+		serverDirectory: config.server.directory,
+		serverContext: config.server.context,
+		jndiName: config.server.jndiName,
+		jndiNameAdmin: config.server.jndiNameAdmin,
+		poolName: config.server.poolName,
+		dbDriver: config.db.driver,
+		dbUrl: config.db.url,
+		dbUser: config.db.user,
+		dbDriverType: config.db.type,
+		dbPassword: config.db.password,
+		project: rootProject.name,
+		environment: config.environment,
+		deploymentScanner: rootProject.path + "/jboss/deploy",
+		bindingDocuments: project.path + "/src/main/resources/documents",
+		bindingReports: project.path + "/src/main/resources/reports",
+
+
+	]
+
+	classifier = config.environment
+
+	// Reports ################################################################
+	into('reports') {
+		from '$rootDir/dist/src/main/resources/reports'
+	}
+
+	// JBoss ##################################################################
+	into('jboss') {
+		from '$rootDir/dist/src/resources/jboss'
+	}
+
+	into('jboss/standalone/configuration') {
+
+		def standaloneXml = new File("$rootDir/dist/src/main/resources/conf/$config.environment/standalone.xml")
+		if (standaloneXml.exists()) {
+			from "$rootDir/dist/src/main/resources/conf/$config.environment/standalone.xml"
+		} else {
+			from "$rootDir/dist/src/main/resources/standalone.xml"
+		}
+	}
+
+	// Scripts ################################################################
+	into('') {
+		// Case windows
+		from "$rootDir/dist/src/main/resources/scripts/$config.os.type"
+		exclude '*.sh'
+		filter(ReplaceTokens, tokens: tokens)
+	}
+
+	into('') {
+		// case *nix
+		from "$rootDir/dist/src/main/resources/scripts/$config.os.type"
+		exclude '*.bat,*.cmd'
+		fileMode 0755
+		// filter(ReplaceTokens, tokens: tokens)
+		filter(FixCrLfFilter, 
+			eol: FixCrLfFilter.CrLf.newInstance('lf'),
+            tab: FixCrLfFilter.AddAsisRemove.newInstance('asis'),
+            eof: FixCrLfFilter.AddAsisRemove.newInstance('remove'),
+            fixlast: true)
+	}
+
+	into('') {
+		// in case there are configurations for a specific environment
+		from "$rootDir/dist/src/main/resources/scripts/$config.environment"
+		fileMode 0755
+		filter(ReplaceTokens, tokens: tokens)
+		filter(FixCrLfFilter, 
+			eol: FixCrLfFilter.CrLf.newInstance('lf'),
+            tab: FixCrLfFilter.AddAsisRemove.newInstance('asis'),
+            eof: FixCrLfFilter.AddAsisRemove.newInstance('remove'),
+            fixlast: true)
+	}
+
+	// Tools ##################################################################
+	into('tools') {
+		// Case windows
+		from "$rootDir/dist/src/main/resources/tools"
+		exclude '*.sh'
+		filter(ReplaceTokens, tokens: tokens)
+	}
+
+	into('tools') {
+		// Case unix
+		from "$rootDir/dist/src/main/resources/tools"
+		exclude '*.bat,*.cmd'
+		fileMode 0755
+		filter(ReplaceTokens, tokens: tokens)
+		filter(FixCrLfFilter,
+			eol: FixCrLfFilter.CrLf.newInstance('lf'),
+			tab: FixCrLfFilter.AddAsisRemove.newInstance('asis'),
+			eof: FixCrLfFilter.AddAsisRemove.newInstance('remove'),
+			fixlast: true)
+	}
+
+	into('tools/flyway/jars') {
+		from configurations.flywayJar
+		rename '(.*)-.*.jar', '$1.jar'
+	}
+
+	// war ####################################################################
+	into('war') {
+		from war.archivePath
+		include '*.war'
+		rename '(.*)-*.war', '$1.war'
+	}
+}
+
+
+// ############################################################################
+// Clean up artifacts
+// ############################################################################
+/*
+task cleanArtifacts(type: helper.CleanUpArtifactory) {
+
+	serverUrl = config.artifactRepository.url
+	user = config.artifactRepository.username
+	password = config.artifactRepository.password
+	repository = config.artifactRepository.name
+	path = project.group.replaceAll('\\.', "/") + "/" + project.name
+	maxArtifacts = 3
+	dryRun = false
+
+}
+*/

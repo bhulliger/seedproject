@@ -151,6 +151,7 @@ gradle.projectsEvaluated {
 		apply from: "$rootDir/gradle/web/web.gradle"
 		apply from: "$rootDir/gradle/web/functionalTests.gradle"
 		apply from: "$rootDir/gradle/web/loadTests.gradle"
+		apply from: "$rootDir/gradle/web/distInstall.gradle"
 	}
 }
 
