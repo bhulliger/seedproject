@@ -3,7 +3,7 @@
 // ############################################################################
 ext.envProperties = System.getenv()
 
-apply from: '$rootDir/libraries.gradle'
+apply from: "$rootDir/libraries.gradle"
 
 // ############################################################################
 // Versioning
