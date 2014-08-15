@@ -5,7 +5,9 @@ templates {
 	scm = "https://github.com/bhulliger/seedproject_templates.git"
 	treeish = 'bf91953e9f17c00f05864624e09abf61e7df3a37'
 	path = "_templates"
-}	
+}
+
+group = 'ch.essentialmustard'
 
 // ############################################################################
 // Operating System & Servers
@@ -68,8 +70,8 @@ sonar {
 
 scm {
 	type = 'git' // 'git' or 'svn' supported
-	url = '<yourProjectRepository>'
-	tagBase = '<yourProjectRepository>/tags' // only required for svn. usually something like http://svn.wherever.com/tags
+	url = 'https://github.com/bhulliger/eduwice.git'
+	tagBase = '' // only required for svn. usually something like http://svn.wherever.com/tags
 }
 
 // ############################################################################

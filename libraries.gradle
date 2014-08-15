@@ -1,0 +1,94 @@
+// ############################################################################
+// List of all used libraries and versions. 
+// ############################################################################
+
+ext.libraries = {
+
+	// Java EE ################################################################
+	javaee_api: 'javax:javaee-api:7.0',
+
+	// Android ################################################################
+	android_support_v4: 'com.google.android:support-v4:r7',
+	android_annotations: 'com.google.android:annotations:4.1.1.4',
+	
+	// Logging ################################################################
+	android_slf4j: 'org.slf4j:slf4j-android:1.7.7',
+	
+	// Dependency Injection ###################################################
+	roboguice: 'org.roboguice:roboguice:2.0',
+
+	// Validation #############################################################
+	validation_api: 'javax.validation:validation-api:1.1.0.Final',
+
+	// Jackson Parsing ########################################################
+	jackson_core: 'org.codehaus.jackson:jackson-core-asl:1.9.13',
+	jackson_mapper: 'org.codehaus.jackson:jackson-mapper-asl:1.9.13',
+
+	// Spring #################################################################
+	spring_android_core: 'org.springframework.android:spring-android-core:1.0.1.RELEASE',
+	spring_android_rest: 'org.springframework.android:spring-android-rest_template:1.0.1.RELEASE',
+	spring_android_rest_sources: 'org.springframework.android:spring-android-rest_template:1.0.1.RELEASE:sources',
+
+	// IMS Components #########################################################
+	ims_annotation_processor: 'ch.ims.component:annotation.processor:2.0.0.4',
+
+	// Annotation Processors ##################################################
+	querydsl_apt: 'com.mysema.querydsl:querydsl-apt:3.4.1',
+	querydsl_jpa: 'com.mysema.querydsl:querydsl-jpa:3.4.1',
+	querydsl_codegen: 'com.mysema.querydsl:querydsl-codegen:3.4.1',
+
+	// Testing ################################################################
+	junit: 	'junit:juni:4.+',
+	mockito_all: 'org.mockito:mockito-all:1.9.+',
+	geb_junit: 'org.codehaus.geb:geb-junit4:0.7.2',
+
+	// GUI Testing ############################################################
+	selenium_api: 'org.seleniumhq.selenium:selenium-api:2.32.0',
+	selenium_ff_driver: 'org.seleniumhq.selenium:selenium-firefox-driver:2.32.0',
+
+	// Utils ##################################################################
+	lombok: 'org.projectlombok:lombok:1.14.+',
+
+	// Cargo ##################################################################
+	cargo_core_uberjar: 'org.codehaus.cargo:cargo-core-uberjar:1.4.+',
+	cargo_ant: 'org.codehaus.cargo:cargo-ant:1.4.+'
+	cargo_jboss: 'org.codehaus.cargo:jboss-as-controller-client:7.2.0.Final',
+	cargo_wildfly: 'org.codehaus.cargo:wildfly-controller-client:8.0.0.Final',
+
+	tomcat_catalina_ant: 'org.apache.tomcat:tomcat-catalina-ant:7.0.39',
+
+	// Flyway #################################################################
+	flyway_gradle_plugin: 'org.flywaydb:flyway-gradle-plugin:3.+',
+	flyway_commandline: 'org.flywaydb:flyway-commandline:3.+',
+	flyway_core: 'org.flywaydb:flyway-core:3.+',
+
+	// DB Drivers #############################################################
+	hsqldb_driver: 'org.hsqldb:hsqldb:2.3.+',
+	ojdbc_driver: 'oracle:jdbc:6.0',
+
+	// Javax Servlets #########################################################
+	servlet_api: 'javax.servlet:servlet-api:2.5',
+	servlet_jstl: 'javax.servlet:jstl:1.1.2',
+
+	// Groovy #################################################################
+	groovy: 'org.codehaus.groovy:groovy:2.0.6',
+
+
+
+	
+
+
+
+
+
+
+
+
+
+
+
+	
+
+
+
+}

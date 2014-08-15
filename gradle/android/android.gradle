@@ -21,27 +21,26 @@ configurations {
 dependencies {
 
 	// Android
-	compile 	group: "com.google.android",	name: "support-v4", 			version: "r7"
-	compile 	group: "com.google.android", 	name: "annotations", 			version: "4.1.1.4"
+	compile 	libraries.android_support_v4
+	compile 	libraries.android_annotations
 
 	// Logging
-	compile 	group: "org.slf4j",				name: "slf4j-android",			version: "1.7.7"
+	compile 	libraries.android_slf4j
 
 	// Misc
-	compile 	group: "org.roboguice", 		name: "roboguice", 				version: "2.0"
-	compile 	group: "javax.validation", 		name: "validation-api", 		version: "1.1.0.Final"
+	compile 	libraries.roboguice
+	compile 	libraries.validation_api
 
 	// Jackson Parsing
-	compile 	group: "org.codehaus.jackson",	name: "jackson-core-asl", 		version: "1.9.13"
-	compile 	group: "org.codehaus.jackson",	name: "jackson-mapper-asl", 	version: "1.9.13"
+	compile 	libraries.jackson_core
+	compile 	libraries.jackson_mapper
 
 	// Spring Android
-	compile 	group: "org.springframework.android", 	name: "spring-android-core", 			version: "1.0.1.RELEASE"
-	compile 	group: "org.springframework.android", 	name: "spring-android-rest-template", 	version: "1.0.1.RELEASE"
-	compile 	group: "org.springframework.android", 	name: "spring-android-rest-template", 	version: "1.0.1.RELEASE:sources"
-
-
-	apt 'ch.ims.component:annotation.processor:2.0.0.4'
+	compile 	libraries.spring_android_core
+	compile 	libraries.spring_android_rest
+	compile 	libraries.spring_android_rest_sources
+	
+	apt 		libraries.ims_annotation_processor
 	apt files(System.getenv()['ANDROID_HOME'] + '\\platforms\\android-19\\android.jar')
 }
 
@@ -142,8 +141,6 @@ android {
 // Project Initialization
 // ############################################################################
 task initProject(type: Copy) {
-
-	println "********************* initializing android project. **************************"
 
 	if (project.getChildProjects().isEmpty()) {
 		android.sourceSets.main.java.srcDirs*.each {

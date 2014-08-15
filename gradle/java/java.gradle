@@ -25,7 +25,16 @@ compileJava {
 // ############################################################################
 // Dependencies for all projects
 // ############################################################################
-apply from: "$rootDir/gradle/java/dependencies.gradle"
+dependencies {
+
+	// Testing
+	testCompile libraries.junit
+	testCompile libraries.mockito_all
+
+	// Utils
+	compile 	libraries.lombok
+
+}
 
 // ############################################################################
 // Build & Distribution

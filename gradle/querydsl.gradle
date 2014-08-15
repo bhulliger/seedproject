@@ -14,9 +14,9 @@ sourceSets {
 // ############################################################################
 dependencies {
 	// Query DSL Dependency
-	compile 	group: 'com.mysema.querydsl', 		name: 'querydsl-apt', 			version: '3.4.1'
-	compile 	group: 'com.mysema.querydsl', 		name: 'querydsl-jpa', 			version: '3.4.1'
-	compile 	group: 'com.mysema.querydsl', 		name: 'querydsl-codegen', 		version: '3.4.1'
+	compile 	libraries.querydsl_apt
+	compile 	libraries.querydsl_jpa
+	compile 	libraries.querydsl_codegen
 }
 
 // ############################################################################
