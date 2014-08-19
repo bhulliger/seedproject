@@ -1,34 +1,17 @@
 // ############################################################################
-// Repository 
-// ############################################################################
-
-repositories {
-	maven {
-		// google snapshot repository. remove once gwt 2.7.+ is stable
-		url "https://oss.sonatype.org/content/repositories/google-snapshots/"
-	}
-	mavenCentral()
-}
-
-// ############################################################################
 // Dependencies for GWT
 // ############################################################################
 dependencies {
 	// Resty GWT
-	providedCompile group: 	'org.fusesource.restygwt', 		name: 'restygwt', 				version: '1.4'
+	providedCompile libraries.restygwt
 
 	// GWT
-	def gwtVersion = '2.7.0-SNAPSHOT'
-	providedCompile group: 	'com.google.gwt', 				name: 'gwt', 					version: gwtVersion
-	providedCompile group: 	'com.google.gwt',				name: 'gwt-user', 				version: gwtVersion
-	providedCompile group: 	'com.google.gwt',				name: 'gwt-dev', 				version: gwtVersion
-	providedCompile group: 	'com.google.gwt',				name: 'gwt-servlet',			version: gwtVersion
+	providedCompile libraries.gwt
+	providedCompile libraries.eventbinder
 	
 	// Gin & Guice
-	providedCompile group: 	'com.google.gwt.inject', 		name: 'gin', 					version: '2.1.2'
-	providedCompile group:	'com.google.inject', 			name: 'guice', 					version: '4.0-beta4'
-	providedCompile group:	'com.google.inject.extensions',	name: 'guice-assistedinject', 	version: '4.0-beta4'
-	providedCompile group: 	'com.google.gwt.eventbinder', 	name: 'eventbinder', 			version: '1.0.2'
+	providedCompile libraries.gin
+	providedCompile libraries.guice
 }
 
 // ############################################################################
