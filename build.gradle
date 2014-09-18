@@ -179,6 +179,7 @@ def javaProjects() {
 gradle.projectsEvaluated {
 	configure(javaProjects()) {
 		apply from: "$rootDir/gradle/java.gradle"
+		apply from: "$rootDir/gradle/querydsl.gradle"
 		apply from: "$rootDir/gradle/integrationTests.gradle"
 
 		tasks.withType(JavaCompile) { 
