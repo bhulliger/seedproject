@@ -2,9 +2,9 @@
 // Source Sets
 // ############################################################################
 sourceSets {
-	integTest {
-        java.srcDir 'src/integTest/java'
-        resources.srcDir 'src/integTest/resources'
+	integrationTest {
+        java.srcDir 'src/integrationTest/java'
+        resources.srcDir 'src/integrationTest/resources'
     }   
 }
 

@@ -1,9 +1,13 @@
 // ############################################################################
+// Plugins
+// ############################################################################
+apply plugin: 'sonar-runner'
+apply plugin: 'pmd'
+apply plugin: 'jdepend'
+
+// ############################################################################
 // Sonar
 // ############################################################################
-
-apply plugin: "sonar-runner"
-
 sonarRunner {
 	sonarProperties {
 		property "sonar.host.url", config.sonar.host.url
@@ -23,10 +27,10 @@ sonarRunner {
 // ############################################################################
 // PMD
 // ############################################################################
-apply plugin: 'pmd'
-
 pmd {
 	ignoreFailures = true
+	// Print OMD statistic analysis results directly to the console.
+	consoleOutput = true 
 }
 
 tasks.withType(Pmd) {
@@ -39,8 +43,6 @@ tasks.withType(Pmd) {
 // ############################################################################
 // JDepend
 // ############################################################################
-apply plugin: 'jdepend'
-
 jdepend {
 	toolVersion = '2.9.1'
 	ignoreFailures = true

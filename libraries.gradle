@@ -1,99 +1,113 @@
 // ############################################################################
 // List of all used libraries and versions. 
 // ############################################################################
+ext.constants = [
+	gwt_version: 			'2.7.0-SNAPSHOT'
+]
 
 ext.libraries = [
 
 	// Java EE ################################################################
-	javaee_api: 'javax:javaee-api:7.0',
+	javaee_api: 			'javax:javaee-api:7.0',
 
 	// Android ################################################################
-	android_support_v4: 'com.google.android:support-v4:r7',
-	android_annotations: 'com.google.android:annotations:4.1.1.4',
+	android_support_v4: 	'com.google.android:support-v4:r7',
+	android_annotations: 	'com.google.android:annotations:4.1.1.4',
+
+	// MGWT ###################################################################
+	mgwt: 					'com.googlecode.mgwt:mgwt:2.0.0',
+	gwtphonegap: 			'com.googlecode.gwtphonegap:gwtphonegap:3.5.0.0',
+
+	// Google Guava ###########################################################
+	guava: [ 				'com.google.guava:guava:18.0',
+							'com.google.guava:guava-gwt:18.0'	
+	],
 	
 	// Logging ################################################################
-	android_slf4j: 'org.slf4j:slf4j-android:1.7.7',
+	android_slf4j: 			'org.slf4j:slf4j-android:1.7.7',
 	
 	// Dependency Injection ###################################################
-	roboguice: 'org.roboguice:roboguice:2.0',
+	roboguice: 				'org.roboguice:roboguice:2.0',
 
-	gin: 			'com.google.gwt.inject:gin:2.1.2',
+	gin: 					'com.google.gwt.inject:gin:2.1.2',
 
-	guice: [ 		'com.google.inject:guice:4.0-beta4',
-					'com.google.inject.extensions:guice-assistedinject:4.0-beta4'
+	guice: [ 				'com.google.inject:guice:4.0-beta4',
+							'com.google.inject.extensions:guice-assistedinject:4.0-beta4'
 	],
 
-	eventbinder: 	'com.google.gwt.eventbinder:eventbinder:1.0.2',
+	// GWT ####################################################################
+	eventbinder: 			'com.google.gwt.eventbinder:eventbinder:1.1.0',
+	gwtcrypto: 	 			'com.googlecode.gwt-crypto:gwt-crypto:2.3.0',
 
 	// Validation #############################################################
-	validation_api: 'javax.validation:validation-api:1.1.0.Final',
+	validation_api: 		'javax.validation:validation-api:1.1.0.Final',
 
 	// Jackson Parsing ########################################################
-	jackson: [		'org.codehaus.jackson:jackson-core-asl:1.9.13',
-					'org.codehaus.jackson:jackson-mapper-asl:1.9.13',
+	jackson: [				'org.codehaus.jackson:jackson-core-asl:1.9.13',
+							'org.codehaus.jackson:jackson-mapper-asl:1.9.13',
 	], 
 
 	// Spring #################################################################
-	spring_android: [	'org.springframework.android:spring-android-core:1.0.1.RELEASE',
-					'org.springframework.android:spring-android-rest_template:1.0.1.RELEASE',
-					'org.springframework.android:spring-android-rest_template:1.0.1.RELEASE:sources'
+	spring_android: [		'org.springframework.android:spring-android-core:1.0.1.RELEASE',
+							'org.springframework.android:spring-android-rest_template:1.0.1.RELEASE',
+							'org.springframework.android:spring-android-rest_template:1.0.1.RELEASE:sources'
 	],
 
 	// IMS Components #########################################################
 	ims_annotation_processor: 'ch.ims.component:annotation.processor:2.0.0.4',
 
 	// Annotation Processors ##################################################
-	querydsl: [ 	'com.mysema.querydsl:querydsl-apt:3.4.1',
-					'com.mysema.querydsl:querydsl-jpa:3.4.1',
-					'com.mysema.querydsl:querydsl-codegen:3.4.1'
+	querydsl: [ 			'com.mysema.querydsl:querydsl-apt:3.4.1',
+							'com.mysema.querydsl:querydsl-jpa:3.4.1',
+							'com.mysema.querydsl:querydsl-codegen:3.4.1'
 	],
 
 	// Testing ################################################################
-	junit: 	'junit:juni:4.+',
-	mockito_all: 'org.mockito:mockito-all:1.9.+',
-	geb_junit: 'org.codehaus.geb:geb-junit4:0.7.2',
+	junit: 					'junit:juni:4.+',
+	mockito_all: 			'org.mockito:mockito-all:1.9.+',
+	geb_junit: 				'org.codehaus.geb:geb-junit4:0.7.2',
 
 	// GUI Testing ############################################################
-	selenium: 	[	'org.seleniumhq.selenium:selenium-api:2.32.0',
-					'org.seleniumhq.selenium:selenium-firefox-driver:2.32.0'
+	selenium: 	[			'org.seleniumhq.selenium:selenium-api:2.32.0',
+							'org.seleniumhq.selenium:selenium-firefox-driver:2.32.0'
 	],
 
 	// Utils ##################################################################
-	lombok: 'org.projectlombok:lombok:1.14.+',
+	lombok: 				'org.projectlombok:lombok:1.14.+',
 
 	// GWT ####################################################################
-	gwt: [			'com.google.gwt:gwt:2.7.0-SNAPSHOT',
-					'com.google.gwt:gwt-user:2.7.0-SNAPSHOT',
-					'com.google.gwt:gwt-dev:2.7.0-SNAPSHOT',
-					'com.google.gwt:gwt-servlet:2.7.0-SNAPSHOT',
+	gwt: [					'com.google.gwt:gwt:2.7.0-SNAPSHOT',
+							'com.google.gwt:gwt-user:2.7.0-SNAPSHOT',
+							'com.google.gwt:gwt-dev:2.7.0-SNAPSHOT',
+							'com.google.gwt:gwt-servlet:2.7.0-SNAPSHOT',
 	], 
 
-	restygwt: 		'org.fusesource.restygwt:restygwt:1.4',
+	restygwt: 				'org.fusesource.restygwt:restygwt:1.4',
 
 	// Cargo ##################################################################
-	cargo: [		'org.codehaus.cargo:cargo-core-uberjar:1.4.+',
-					'org.codehaus.cargo:cargo-ant:1.4.+',
-					'org.codehaus.cargo:jboss-as-controller-client:7.2.0.Final',
-					'org.codehaus.cargo:wildfly-controller-client:8.0.0.Final'
+	cargo: [				'org.codehaus.cargo:cargo-core-uberjar:1.4.+',
+							'org.codehaus.cargo:cargo-ant:1.4.+',
+							'org.codehaus.cargo:jboss-as-controller-client:7.2.0.Final',
+							'org.codehaus.cargo:wildfly-controller-client:8.0.0.Final'
 	],
 
-	tomcat_catalina_ant: 'org.apache.tomcat:tomcat-catalina-ant:7.0.39',
+	tomcat_catalina_ant: 	'org.apache.tomcat:tomcat-catalina-ant:7.0.39',
 
 	// Flyway #################################################################
-	flyway: [		'org.flywaydb:flyway-gradle-plugin:3.+',
-					'org.flywaydb:flyway-commandline:3.+',
-					'org.flywaydb:flyway-core:3.+'
+	flyway: [				'org.flywaydb:flyway-gradle-plugin:3.+',
+							'org.flywaydb:flyway-commandline:3.+',
+							'org.flywaydb:flyway-core:3.+'
 	],
 
 	// DB Drivers #############################################################
-	hsqldb_driver: 'org.hsqldb:hsqldb:2.3.+',
-	ojdbc_driver: 'oracle:jdbc:6.0',
+	hsqldb_driver: 			'org.hsqldb:hsqldb:2.3.+',
+	ojdbc_driver: 			'oracle:jdbc:6.0',
 
 	// Javax Servlets #########################################################
-	servlet_api: 'javax.servlet:servlet-api:2.5',
-	servlet_jstl: 'javax.servlet:jstl:1.1.2',
+	servlet_api: 			'javax.servlet:servlet-api:2.5',
+	servlet_jstl: 			'javax.servlet:jstl:1.1.2',
 
 	// Groovy #################################################################
-	groovy: 'org.codehaus.groovy:groovy:2.0.6',
+	groovy: 				'org.codehaus.groovy:groovy:2.0.6',
 
 ]

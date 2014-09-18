@@ -1,9 +1,14 @@
 // ############################################################################
+// Plugins
+// ############################################################################
+plugins {
+    id 'jetty'
+    id 'groovy'
+}
+
+// ############################################################################
 // Run Functional Tests (Selenium and others) in a jetty server
 // ############################################################################
-apply plugin: 'jetty'
-apply plugin: 'groovy'
-
 configurations {
     functTestCompile.extendsFrom testCompile
     functTestRuntime.extendsFrom testRuntime
@@ -29,8 +34,8 @@ dependencies {
 // ############################################################################
 sourceSets {
     functionalTest {
-        java.srcDir file('src/functionalTest/groovy')
-        resources.srcDir file('src/functionalTest/resources')
+        java.srcDir 'src/functionalTest/groovy'
+        resources.srcDir 'src/functionalTest/resources'
         compileClasspath = sourceSets.main.output + configurations.functTestCompile
         runtimeClasspath = output + compileClasspath + configurations.functTestRuntime
     }

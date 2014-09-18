@@ -158,14 +158,6 @@ environments {
 	// ########################################################################
 	integration {
 		env = "integration"
-
-		container {
-			remote {
-				hostname = "<deployment host>" // TODO The hostname of the remote container
-				username = "<deployment user>" // TODO The username for deployment
-				password = "<deployment password>" // TODO The password for remote deployment
-			}
-		}
 		// TODO
 	}
 

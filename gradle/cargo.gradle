@@ -1,10 +1,14 @@
-apply plugin: org.gradle.api.plugins.cargo.CargoPlugin
+// ############################################################################
+// Plugins
+// ############################################################################
+plugins {
+	id 'cargo' version '1.5'
+	id 'ssh' version '0.3.11'
+}
 
 // ############################################################################
 // Dependencies
 // ############################################################################
-
-
 configurations {
 	cargo
 	tomcatAnt
@@ -110,8 +114,6 @@ cargoUndeployRemote {
 // ############################################################################
 // Remote Deployment (by bash script)
 // ############################################################################
-apply plugin: 'ssh'
-
 remotes {
 	remoteServer {
 		host = "${config.server.ip}"
@@ -138,8 +140,3 @@ task autoinstall(type: SshTask, dependsOn: downloadBinaryArchive) {
 		execute("cd ${config.server.remoteDir}; unzip -o distribution-*.zip; ./autoinstall.sh; cd -;")
 	}
 }
-
-
-
-
-
