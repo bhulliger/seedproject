@@ -18,9 +18,7 @@ sonarRunner {
 
 dependencies {
 	// Flyway
-	flywayJar	libraries.flyway_gradle_plugin
-	flywayJar	libraries.flyway_commandline
-	flywayJar	libraries.flyway_core
+	flywayJar	libraries.flyway
 
 	// HsqlDB
 	// flywayJar 	libraries.hsqldb_driver

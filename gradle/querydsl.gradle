@@ -14,9 +14,7 @@ sourceSets {
 // ############################################################################
 dependencies {
 	// Query DSL Dependency
-	compile 	libraries.querydsl_apt
-	compile 	libraries.querydsl_jpa
-	compile 	libraries.querydsl_codegen
+	compile 	libraries.querydsl
 }
 
 // ############################################################################

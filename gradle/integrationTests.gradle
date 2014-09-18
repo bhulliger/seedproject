@@ -15,8 +15,8 @@ task integrationTest(type: Test) {
 	description 'Run the integration tests (long running tests and tests with external resources)'
 	group = 'verification'
 
-	testClassesDir = sourceSets.integTest.output.classesDir
-	classpath = sourceSets.integTest.runtimeClasspath
+	testClassesDir = sourceSets.integrationTest.output.classesDir
+	classpath = sourceSets.integrationTest.runtimeClasspath
 
 	reports {
 		junitXml {
