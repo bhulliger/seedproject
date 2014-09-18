@@ -1,1 +1,1 @@
-include "app:web", "shared:core", "services:webservice"
+include "app:web", "app:core"
