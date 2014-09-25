@@ -61,7 +61,7 @@ ext.libraries = [
 	],
 
 	// Testing ################################################################
-	junit: 					'junit:juni:4.+',
+	junit: 					'junit:junit:4.+',
 	mockito_all: 			'org.mockito:mockito-all:1.9.+',
 	geb_junit: 				'org.codehaus.geb:geb-junit4:0.7.2',
 
