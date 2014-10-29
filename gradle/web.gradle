@@ -33,3 +33,35 @@ initProject {
 	new File(webAppDir.toString() + "/WEB-INF").mkdirs()
 	new File(webAppDir.toString() + "/META-INF").mkdirs()
 }
+
+// ############################################################################
+// Eclipse Project Nature for generated sources
+// ############################################################################
+eclipse {
+	project {
+		natures 'org.eclipse.xtext.ui.shared.xtextNature'
+		natures 'com.google.gwt.eclipse.core.gwtNature'
+		natures 'org.sonar.ide.eclipse.core.sonarNature'
+		buildCommand 'org.eclipse.xtext.ui.shared.xtextBuilder'
+		buildCommand 'com.google.gdt.eclipse.core.webAppProjectValidator'
+		buildCommand 'com.google.gwt.eclipse.core.gwtProjectValidator'
+	}
+
+	classpath {
+		containers.clear();
+		containers 'org.eclipse.jdt.launching.JRE_CONTAINER','com.google.gwt.eclipse.core.GWT_CONTAINER','org.eclipse.jst.j2ee.internal.web.container'
+
+		defaultOutputDir = file('war/WEB-INF/classes')
+	}
+
+	wtp {
+		component {
+			//Damit keine Client Klassen auf den App Server deployed werden
+			property name: 'component.exclusion.patterns', value: 'WEB-INF/classes/**/client/**'
+			property name: 'component.exclusion.patterns', value: 'WEB-INF/classes/org/fusesource/**'
+			//Damit die kompilierte GWT Anwendung bei der Entwicklung deployed wird
+			resource sourcePath: "/war/$rootProject.name", deployPath: "$rootProject.name"
+			resource sourcePath: '/src/main/webapp', deployPath: '/'
+		}
+	}
+}

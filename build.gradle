@@ -9,7 +9,6 @@ buildscript {
 
 	dependencies {
 		classpath 'com.palominolabs.gradle.task:gradle-git-clone-task:0.0.2'
-		classpath 'de.richsource.gradle.plugins:gwt-gradle-plugin:0.5'
 	}
 }
 
@@ -95,7 +94,6 @@ subprojects {
 	// ########################################################################
 	jacoco {
 		toolVersion = "0.7.1.201405082137"
-		// integrationTestTaskName = "integrationTest"
 	}
 
 	// ########################################################################
