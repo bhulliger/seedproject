@@ -1,0 +1,36 @@
+// ############################################################################
+// Source Sets
+// ############################################################################
+sourceSets {
+	cucumber {
+		java {
+			srcDirs += 'src/cucumber/java'
+		}
+		resources {
+			srcDirs += 'src/cucumber/resources'
+		}
+	}
+}
+
+// ############################################################################
+// Dependencies
+// ############################################################################
+dependencies {
+	testCompile libraries.cucumber
+}
+
+// ############################################################################
+// Plugin configuration
+// ############################################################################
+cucumber {
+	monochrome = false
+}
+
+// ############################################################################
+// Project Initialization
+// ############################################################################
+initProject {
+	createPackages(sourceSets.cucumber.java.srcDirs, false)
+	createPackages(sourceSets.cucumber.resources.srcDirs, false)
+}
+

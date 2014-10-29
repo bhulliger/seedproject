@@ -3,7 +3,7 @@
 // ############################################################################
 templates {
 	scm = "https://github.com/bhulliger/seedproject_templates.git"
-	treeish = '2117764aad35b4036261307ae4288f02d05f4e25'
+	treeish = 'd26ad0d864083e37bd4c3efb860a16407e943747'
 	path = "_templates"
 }
 
@@ -19,7 +19,7 @@ os {
 container {
 	containerId = "tomcat8x" // containerId (http://cargo.codehaus.org/Home) to use for deployment. 
 	installUrl = "http://mirror.switch.ch/mirror/apache/dist/tomcat/tomcat-8/v8.0.9/bin/apache-tomcat-8.0.9.zip" //Url where to download the container from. 
-	port = 8005 // (Optional). Port where you want to run the applicationserver on
+	port = 8080 // (Optional). Port where you want to run the applicationserver on
 
 	context = "" // (Optional). The context where to run the application in the app server. if not provided, then the context is composed as <rootProjectName>-<projectName>
 

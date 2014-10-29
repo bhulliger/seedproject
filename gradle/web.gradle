@@ -1,4 +1,5 @@
 import org.apache.tools.ant.filters.ReplaceTokens
+
 // ############################################################################
 // Packaging
 // ############################################################################
@@ -12,10 +13,7 @@ task createBuildInfoFile << {
 }
 
 war {
-	dependsOn createBuildInfoFile
-
-	war.rootSpec.exclude "**/web/client/**"
-	war.rootSpec.exclude "org/fusesorce/**"
+	// dependsOn createBuildInfoFile
 
 	from(buildDir) {
 		include 'build-info.properties'
@@ -23,14 +21,8 @@ war {
 	}
 }
 
-war.doLast {
-	delete fileTree('./war')
-	ant.unzip(src: war.archivePath, dest: './war')
-}
-
 processResources {
 	filter(ReplaceTokens, tokens: [ 'version': project.version.toString(), 'buildTime': buildTimestamp ] )
-	exclude '*.mdsd'
 }
 
 // ############################################################################
@@ -40,8 +32,4 @@ initProject {
 	webAppDir.mkdirs()
 	new File(webAppDir.toString() + "/WEB-INF").mkdirs()
 	new File(webAppDir.toString() + "/META-INF").mkdirs()
-
-	// loadtests dir
-	project.path.replaceAll('\\:', '/')
-	new File("$projectDir/src/loadTest/resources").mkdirs()
 }

@@ -3,6 +3,43 @@
 // ############################################################################
 sourceCompatibility = 1.8
 
+sourceSets {
+	generated
+	integTest
+}
+
+// ############################################################################
+// Dependencies
+// ############################################################################
+dependencies {
+
+	// Testing
+	testCompile libraries.junit
+	testCompile libraries.mockito_all
+
+	// Integration Tests
+	integTestCompile libraries.junit
+
+	// Utils
+	compile 	libraries.lombok
+}
+
+// Integration Tests ##########################################################
+task integrationTest(type: Test) {
+	description 'Run the integration tests (long running tests and tests with external resources)'
+
+	group = 'verification'
+
+	testClassesDir = sourceSets.integTest.output.classesDir
+	classpath += sourceSets.integTest.runtimeClasspath
+
+	reports {
+		junitXml {
+			destination = file("$reportsDir/integTests")
+		}
+	}
+}
+
 // ############################################################################
 // Source Code generators (AnnotationProcessors)
 // ############################################################################
@@ -22,21 +59,6 @@ tasks.withType(JavaCompile) {
 	options.incremental = true
 }
 
-
-// ############################################################################
-// Dependencies for all projects
-// ############################################################################
-dependencies {
-
-	// Testing
-	testCompile libraries.junit
-	testCompile libraries.mockito_all
-
-	// Utils
-	compile 	libraries.lombok
-
-}
-
 // ############################################################################
 // Build & Distribution
 // ############################################################################
@@ -45,29 +67,20 @@ jar {
 	from project.sourceSets.main.allJava
 
 	manifest {
-		attributes 'Implementation-Title' : rootProject.name + "-" + project.name, 'Implementation-Version' : version
+		attributes 'Implementation-Title' : rootProject.name + '-' + project.name, 'Implementation-Version' : version
 	}
-}
 
+}
 
 // ############################################################################
 // Project Initialization
 // ############################################################################
 initProject {
-	sourceSets*.java.srcDirs*.each {
-		new File(it.toString() + "/" + rootProject.group.replaceAll('\\.', '/') + '/' + rootProject.name + '/' + project.name).mkdirs()
-	}
-	sourceSets*.resources.srcDirs*.each {
-		new File(it.toString() + "/" + rootProject.group.replaceAll('\\.', '/') + '/' + rootProject.name + '/' + project.name).mkdirs()
+
+	sourceSets*.each {
+		createPackages(it.java.srcDirs, true)
+		createPackages(it.resources.srcDirs, false)
 	}
 }
 
-// ############################################################################
-// Reporting
-// ############################################################################
-jacocoTestReport {
-	reports {
-		xml.enabled true
-	}
-}
 
