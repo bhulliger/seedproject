@@ -94,30 +94,10 @@ subprojects {
 	// ########################################################################
 	jacoco {
 		toolVersion = "0.7.1.201405082137"
-	}
+	} 
 
-	// ########################################################################
-	// Project Initialization
-	// ########################################################################
-	task initProject(type: Copy) {
-		description 'initializes the project structure with all required packages and build files.'
-
-		// At least create a build.gradle and the folders for each projects (even for the ones without templates.)
-		new File("$rootDir/" + project.path.replaceAll(":", "/")).mkdirs()
-		
-		if (project.getChildProjects().isEmpty()) {
-			from "$rootDir/$config.templates.path/skeleton/" + project.path.replaceAll(':', '/')
-			into "$rootDir" + project.path.replaceAll(':', '/')
-		}
-	}
-
-	// ########################################################################
-	// Scaffolding of project structure
-	// ########################################################################
-	task scaffold(dependsOn: initProject) {
-		description 'Scaffolds a basic application based on the provided template structure (in dist/src/main/resources/build.groovy)'
-		
-		ext.templateBasePath = "${rootDir}/${config.templates.path}/scaffolding/" + project.path.replaceAll(':', '/') + '/'
+	task initPackages << {
+		// extended in subprojects
 	}
 }
 
@@ -202,30 +182,25 @@ task cloneRepo(type: com.palominolabs.gradle.task.git.clone.GitCloneTask) {
     enabled = !destination.exists() // to clone only once
 }
 
-task initProject(type: Copy, dependsOn: cloneRepo) {
-
+task initProject << {
 	description 'initializes the root project with the distribution files.'
 	group 'Initialization'
 
-	dependsOn subprojects.initProject
+	subprojects.each { p ->
+		// At least create a build.gradle and the folders for each projects (even for the ones without templates.)
+		new File("$rootDir/" + p.path.replaceAll(":", "/")).mkdirs()
+		
+		if (p.getChildProjects().isEmpty()) {
 
-	from "$rootDir/$config.templates.path/skeleton/dist" 
-	into 'dist'
-}
-
-task scaffold(dependsOn: initProject) {
-	description 'Scaffolds the project based on a sample seed project. '
-	group 'Initialization'
-
-	dependsOn subprojects.scaffold
-
-	doLast {
-		if (config.os.type != 'win') {
-			// the gradle job prohibits to delete the templates dir in windows.
-			delete "$rootDir/$config.templates.path"
+			copy {
+		        from "$rootDir/$config.templates.path/skeleton" + p.path.replaceAll(':', '/')
+		        into "$rootDir" + p.path.replaceAll(':', '/')
+		    }
 		}
 	}
 }
+
+initProject.dependsOn cloneRepo
 
 def createPackages(LinkedHashSet sourceDirectories, boolean subPackages) {
 	sourceDirectories.each {
@@ -236,19 +211,3 @@ def createPackages(LinkedHashSet sourceDirectories, boolean subPackages) {
 		}
 	}
 } 
-
-// ############################################################################
-// Project Cleanup
-// ############################################################################
-task deleteAll(type: Copy, group: 'cleanup', description: 'Removes all subprojects and the content. Don`t use this lightly!') << {
-
-	delete 'bin'
-	delete 'build'
-	delete '.gradle'
-	delete 'dist'
-	delete config.templates.path
-
-	rootProject.getChildProjects().each {
-		delete it.key
-	}
-}

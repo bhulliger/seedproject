@@ -29,7 +29,7 @@ cucumber {
 // ############################################################################
 // Project Initialization
 // ############################################################################
-initProject {
+initPackages << {
 	createPackages(sourceSets.cucumber.java.srcDirs, false)
 	createPackages(sourceSets.cucumber.resources.srcDirs, false)
 }

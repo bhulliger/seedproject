@@ -28,7 +28,7 @@ processResources {
 // ############################################################################
 // Project initialization
 // ############################################################################
-initProject {
+initPackages << {
 	webAppDir.mkdirs()
 	new File(webAppDir.toString() + "/WEB-INF").mkdirs()
 	new File(webAppDir.toString() + "/META-INF").mkdirs()

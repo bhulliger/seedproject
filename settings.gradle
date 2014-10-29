@@ -1,6 +1,7 @@
-include 'api'
-include 'services:webservice' 
-include 'services:shared'
-include 'shared'
+//include 'api'
+//include 'services:webservice' 
+//include 'services:shared'
+//include 'shared'
 include 'app:web'
 include 'app:core'
+

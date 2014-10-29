@@ -75,7 +75,7 @@ jar {
 // ############################################################################
 // Project Initialization
 // ############################################################################
-initProject {
+initPackages << {
 
 	sourceSets*.each {
 		createPackages(it.java.srcDirs, true)
