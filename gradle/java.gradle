@@ -78,8 +78,8 @@ jar {
 initPackages << {
 
 	sourceSets*.each {
-		createPackages(it.java.srcDirs, true)
-		createPackages(it.resources.srcDirs, false)
+		createPackages(it.java.srcDirs, project.name.toLowerCase(), true)
+		createPackages(it.resources.srcDirs, project.name.toLowerCase(), false)
 	}
 }
 

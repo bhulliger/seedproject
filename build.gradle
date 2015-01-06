@@ -202,10 +202,10 @@ task initProject << {
 
 initProject.dependsOn cloneRepo
 
-def createPackages(LinkedHashSet sourceDirectories, boolean subPackages) {
+def createPackages(LinkedHashSet sourceDirectories, String projectName, boolean subPackages) {
 	sourceDirectories.each {
 		if (subPackages) {
-			new File(it.toString() + "/" + rootProject.group.replaceAll('\\.', '/').toLowerCase() + '/' + rootProject.name.toLowerCase() + '/' + project.name.toLowerCase()).mkdirs()
+			new File(it.toString() + "/" + rootProject.group.replaceAll('\\.', '/').toLowerCase() + '/' + rootProject.name.toLowerCase() + '/' + projectName).mkdirs()
 		} else {
 			it.mkdirs()
 		}
